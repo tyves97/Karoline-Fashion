@@ -6,6 +6,8 @@
 <title>Fashion Couture Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Manifest PWA -->
+<link rel="manifest" href="./manifest.json">
 <style>
 :root {
   --gold:#FF3CAC;--gold-light:#FF8FD8;--gold-dark:#C4006E;
@@ -15,6 +17,7 @@
   --accent1:#784CF4;--sidebar-bg:#140328;--sidebar-border:rgba(255,60,172,0.2);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;}
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;z-index:100;border-right:1px solid var(--sidebar-border);}
 .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,60,172,0.15);background:linear-gradient(135deg,rgba(120,76,244,0.3),rgba(255,60,172,0.1));}
@@ -102,66 +105,63 @@ select.form-control{cursor:pointer;}
 .gallery-info .cat{font-size:12px;color:var(--mid);margin-top:2px;}
 .mesures-body{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .mesures-body{
+
 display:grid;
+
 grid-template-columns:
 repeat(auto-fit,minmax(220px,1fr));
+
 gap:18px;
+
 margin-top:20px;
 }
+
+
 .mesure-item{
+
 background:linear-gradient(
 135deg,
 rgba(120,76,244,0.08),
 rgba(255,60,172,0.06)
 );
+
 border:1px solid
 rgba(120,76,244,0.15);
+
 border-radius:18px;
+
 padding:18px;
+
 display:flex;
+
 flex-direction:column;
+
 align-items:center;
+
 justify-content:center;
+
 text-align:center;
+
 transition:0.3s;
+
 box-shadow:
 0 4px 12px rgba(120,76,244,0.08);
 }
+
+
 .mesure-item:hover{
+
 transform:translateY(-4px);
+
 box-shadow:
 0 8px 20px rgba(120,76,244,0.18);
+
 background:linear-gradient(
 135deg,
 rgba(120,76,244,0.12),
 rgba(255,60,172,0.10)
-);
-}
-.mesure-label{
-font-size:13px;
-font-weight:600;
-color:var(--mid);
-margin-bottom:10px;
-text-transform:uppercase;
-letter-spacing:.05em;
-}
-.mesure-value{
-font-family:'Playfair Display',serif;
-font-size:28px;
-font-weight:700;
-background:linear-gradient(
-135deg,
-#784CF4,#FF3CAC);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-background-clip:text;
-}
-.mesure-unit{
-font-size:13px;color:var(--mid);margin-left:4px;
-}
-.mesure-label{font-size:13px;color:var(--mid);}
-.mesure-value{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--dark);}
-.mesure-unit{font-size:12px;color:var(--mid);margin-left:4px;}
+);}
+
 .tabs{display:flex;gap:4px;background:var(--light);border:1px solid rgba(120,76,244,0.15);border-radius:10px;padding:4px;margin-bottom:20px;}
 .tab{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--mid);transition:all .15s;border:none;background:none;}
 .tab.active{background:linear-gradient(135deg,#784CF4,#FF3CAC);color:white;box-shadow:0 2px 8px rgba(120,76,244,0.3);}
@@ -203,9 +203,405 @@ font-size:13px;color:var(--mid);margin-left:4px;
 .tache-card.retard{border-left:4px solid #FF3B5C;background:#FFF8F9;}
 .tache-card.urgent{border-left:4px solid #FF8C00;background:#FFFBF5;}
 .tache-card.ok{border-left:4px solid #00C897;background:#F5FFFB;}
+
+/* ============================================
+   RESPONSIVE MOBILE — hamburger + sidebar
+   ============================================ */
+
+/* Bouton hamburger (caché sur desktop) */
+.hamburger{
+  display:none;
+  flex-direction:column;
+  gap:5px;
+  cursor:pointer;
+  padding:8px;
+  border-radius:8px;
+  background:none;
+  border:none;
+  margin-right:8px;
+}
+.hamburger span{
+  display:block;width:22px;height:2px;
+  background:#784CF4;border-radius:2px;
+  transition:all .25s;
+}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* Overlay fond sombre quand sidebar ouverte sur mobile */
+.sidebar-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.5);
+  z-index:99;
+}
+.sidebar-overlay.open{display:block;}
+
+@media (max-width: 768px) {
+
+  /* Sidebar glissante depuis la gauche */
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:200;
+    width:260px;
+  }
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  /* Main prend toute la largeur */
+  .main{
+    margin-left:0 !important;
+    width:100%;
+  }
+
+  /* Topbar : afficher le hamburger */
+  .hamburger{display:flex;}
+
+  /* Topbar layout ajusté */
+  .topbar{
+    padding:0 14px;
+    gap:8px;
+  }
+  .topbar-title{font-size:15px;}
+  .topbar-right{gap:8px;}
+  .topbar-right .btn-sm{padding:6px 10px;font-size:12px;}
+
+  /* Contenu avec moins de padding */
+  .content{padding:16px;}
+
+  /* Stats : 2 colonnes sur mobile */
+  .stats-grid{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat-value{font-size:22px;}
+
+  /* Graphiques en colonne */
+  .chart-row{grid-template-columns:1fr;}
+
+  /* Galerie : 2 colonnes */
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+
+  /* Tables : scroll horizontal */
+  .card{overflow-x:auto;}
+  table{min-width:560px;}
+
+  /* Bilan PDF grid en colonne */
+  #view-dashboard .card > div > div[style*="grid-template-columns:repeat(4"]{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  /* Form grids en colonne */
+  .form-grid-2,.form-grid-3{grid-template-columns:1fr;}
+
+  /* Modales plein écran */
+  .modal{
+    width:100% !important;
+    max-width:100vw !important;
+    max-height:100vh !important;
+    border-radius:0;
+    padding:20px 16px;
+    margin:0;
+  }
+  .modal-overlay.open{
+    align-items:flex-end;
+  }
+
+  /* Mat-row en colonne */
+  .mat-row{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+
+  /* Image déco moins haute */
+  div[style*="height:260px"]{
+    height:140px !important;
+  }
+
+  /* Mesures : 2 col */
+  .mesures-body{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  /* Login screen padding mobile */
+  #admin-login-screen > div{
+    padding:28px 20px !important;
+    margin:12px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .stats-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:1fr;}
+  .topbar-title{font-size:13px;}
+}
 </style>
+<!-- Service Worker : silencieux en preview, actif sur serveur réel -->
+<script>
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  if (location.hostname === '' || location.hostname.includes('claudeusercontent.com')) return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(function(r){ console.log('[SW] OK :', r.scope); })
+      .catch(function(e){ console.error('[SW] Erreur :', e); });
+  });
+})();
+</script>
 </head>
 <body>
+
+<!-- ================================================
+     ÉCRAN LOGIN ADMIN — TÉLÉPHONE OU EMAIL
+     ================================================ -->
+<div id="admin-login-screen" style="
+  display:flex;
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#140328 0%,#1C1033 50%,#3D1265 100%);
+  align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;
+">
+  <div style="
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,60,172,0.25);
+    border-radius:24px;
+    padding:44px 36px;
+    width:100%;max-width:420px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 24px 80px rgba(0,0,0,0.5);
+    text-align:center;
+  ">
+    <!-- Logo + titre -->
+    <div style="font-size:44px;margin-bottom:6px;">🔐</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#FF3CAC;margin-bottom:4px;">Espace Admin</div>
+    <div style="font-size:11px;color:rgba(255,143,216,0.55);letter-spacing:.14em;text-transform:uppercase;margin-bottom:28px;">Karoline Fashion Couture</div>
+
+    <!-- Message erreur -->
+    <div id="admin-login-err" style="
+      display:none;
+      background:rgba(255,59,92,0.15);
+      border:1px solid rgba(255,59,92,0.4);
+      color:#FF8FA3;border-radius:10px;
+      padding:10px 14px;font-size:13px;
+      margin-bottom:16px;text-align:left;
+    "></div>
+
+    <!-- Menu déroulant : choisir mode connexion -->
+    <div style="margin-bottom:20px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Mode de connexion</label>
+      <select id="adm-mode" onchange="toggleAdminMode()" style="
+        width:100%;padding:12px 16px;
+        border:1px solid rgba(255,60,172,0.3);
+        border-radius:10px;
+        background:rgba(120,76,244,0.15);
+        color:#EEE6FF;font-size:14px;
+        font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+        appearance:auto;-webkit-appearance:auto;
+      ">
+        <option value="tel">📱 Connexion par téléphone</option>
+        <option value="email">✉️ Connexion par email</option>
+      </select>
+    </div>
+
+    <!-- Champ TÉLÉPHONE -->
+    <div id="adm-tel-block" style="margin-bottom:16px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Numéro de téléphone</label>
+      <div style="display:flex;gap:8px;">
+        <select id="adm-country" style="
+          padding:12px 10px;
+          border:1px solid rgba(255,60,172,0.3);
+          border-radius:10px;
+          background:rgba(255,255,255,0.08);
+          color:#EEE6FF;font-size:14px;
+          font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+        ">
+          <option value="+225">🇨🇮 +225</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+221">🇸🇳 +221</option>
+          <option value="+229">🇧🇯 +229</option>
+          <option value="+1">🇺🇸 +1</option>
+        </select>
+        <input id="adm-tel" type="tel" placeholder="07 57 89 73 4" style="
+          flex:1;padding:12px 16px;
+          border:1px solid rgba(255,60,172,0.3);
+          border-radius:10px;
+          background:rgba(255,255,255,0.08);
+          color:#EEE6FF;font-size:14px;
+          font-family:'DM Sans',sans-serif;outline:none;
+        " onkeydown="if(event.key==='Enter')document.getElementById('adm-pass').focus()">
+      </div>
+    </div>
+
+    <!-- Champ EMAIL (caché par défaut) -->
+    <div id="adm-email-block" style="display:none;margin-bottom:16px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Adresse email</label>
+      <input id="adm-email" type="email" placeholder="tyves97@gmail.com" style="
+        width:100%;padding:12px 16px;
+        border:1px solid rgba(255,60,172,0.3);
+        border-radius:10px;
+        background:rgba(255,255,255,0.08);
+        color:#EEE6FF;font-size:14px;
+        font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;
+      " onkeydown="if(event.key==='Enter')document.getElementById('adm-pass').focus()">
+    </div>
+
+    <!-- Mot de passe -->
+    <div style="margin-bottom:24px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Mot de passe</label>
+      <div style="position:relative;">
+        <input id="adm-pass" type="password" placeholder="••••••••" style="
+          width:100%;padding:12px 16px;
+          border:1px solid rgba(255,60,172,0.3);
+          border-radius:10px;
+          background:rgba(255,255,255,0.08);
+          color:#EEE6FF;font-size:14px;
+          font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;
+        " onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <span onclick="toggleAdminPass()" style="
+          position:absolute;right:14px;top:50%;transform:translateY(-50%);
+          cursor:pointer;font-size:16px;opacity:0.6;
+        ">👁</span>
+      </div>
+    </div>
+
+    <!-- Bouton connexion -->
+    <button onclick="doAdminLogin()" style="
+      width:100%;padding:14px;
+      background:linear-gradient(135deg,#784CF4,#FF3CAC);
+      color:white;border:none;border-radius:12px;
+      font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+      cursor:pointer;
+      box-shadow:0 8px 24px rgba(255,60,172,0.35);
+      transition:all .2s;
+    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+      Se connecter →
+    </button>
+
+    <div style="margin-top:18px;">
+      <a href="./index.html" style="font-size:13px;color:rgba(255,143,216,0.4);text-decoration:none;">← Retour au site</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+// COMPTES ADMIN — modifiez ici vos identifiants
+// =====================================================
+const ADMIN_ACCOUNTS = [
+  { tel: '+225075789734', pass: btoa('Admin225') },
+];
+const ADMIN_EMAIL_ADDR = 'tyves97@gmail.com';
+const ADMIN_EMAIL_PASS = btoa('Admin97');
+
+// Basculer entre téléphone et email
+function toggleAdminMode() {
+  const mode = document.getElementById('adm-mode').value;
+  document.getElementById('adm-tel-block').style.display   = mode === 'tel'   ? 'block' : 'none';
+  document.getElementById('adm-email-block').style.display = mode === 'email' ? 'block' : 'none';
+}
+
+// Afficher/masquer mot de passe
+function toggleAdminPass() {
+  const inp = document.getElementById('adm-pass');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function showAdminErr(msg) {
+  const err = document.getElementById('admin-login-err');
+  err.textContent = '⚠ ' + msg;
+  err.style.display = 'block';
+}
+
+function checkAdminSession() {
+  if (sessionStorage.getItem('adminAuth') === 'true') {
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.querySelector('aside.sidebar').style.display = '';
+    document.querySelector('main.main').style.display = '';
+    // Indispensable : Live Server recharge la page, renderAll doit se relancer
+    if (typeof renderAll === 'function') renderAll();
+    if (typeof autoDetectRetards === 'function') autoDetectRetards();
+    if (typeof toggleBilanDates === 'function') toggleBilanDates();
+    if (typeof initWeekInputs === 'function') initWeekInputs();
+  } else {
+    document.getElementById('admin-login-screen').style.display = 'flex';
+    document.querySelector('aside.sidebar').style.display = 'none';
+    document.querySelector('main.main').style.display = 'none';
+  }
+}
+
+function doAdminLogin() {
+  const mode = document.getElementById('adm-mode').value;
+  const pass = document.getElementById('adm-pass').value;
+  const err  = document.getElementById('admin-login-err');
+  err.style.display = 'none';
+
+  if (!pass) { showAdminErr('Entrez votre mot de passe'); return; }
+
+  let ok = false;
+
+  if (mode === 'tel') {
+    // --- Connexion par téléphone ---
+    const country  = document.getElementById('adm-country').value;
+    const num      = document.getElementById('adm-tel').value.trim().replace(/\s/g, '');
+    if (!num) { showAdminErr('Entrez votre numéro de téléphone'); return; }
+    const tel_full = country + num;
+
+    // Vérification comptes hard-codés
+    ok = !!ADMIN_ACCOUNTS.find(a => a.tel === tel_full && a.pass === btoa(pass));
+
+    // Vérification localStorage (créé depuis index.html)
+    if (!ok) {
+      const users = JSON.parse(localStorage.getItem('fc_users') || '[]');
+      ok = !!users.find(u => u.tel_full === tel_full && u.pass === btoa(pass) && u.role === 'admin');
+    }
+
+  } else {
+    // --- Connexion par email ---
+    const email = document.getElementById('adm-email').value.trim().toLowerCase();
+    if (!email) { showAdminErr('Entrez votre adresse email'); return; }
+
+    // Vérification email hard-codé
+    ok = (email === ADMIN_EMAIL_ADDR && btoa(pass) === ADMIN_EMAIL_PASS);
+
+    // Vérification localStorage
+    if (!ok) {
+      const users = JSON.parse(localStorage.getItem('fc_users') || '[]');
+      ok = !!users.find(u => u.email && u.email.toLowerCase() === email && u.pass === btoa(pass) && u.role === 'admin');
+    }
+  }
+
+  if (ok) {
+    sessionStorage.setItem('adminAuth', 'true');
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.querySelector('aside.sidebar').style.display = '';
+    document.querySelector('main.main').style.display   = '';
+    renderAll();
+  } else {
+    showAdminErr('Identifiant ou mot de passe incorrect');
+  }
+}
+
+// logoutAdmin() définie dans le bloc login en haut du fichier
+// ===============================
+// DECONNEXION ADMIN
+// ===============================
+
+function logoutAdmin(){
+  sessionStorage.removeItem('adminAuth');
+  window.location.reload();
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  document.querySelector('aside.sidebar').style.display = 'none';
+  document.querySelector('main.main').style.display   = 'none';
+  checkAdminSession();
+});
+</script>
+<!-- ================================================ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <img
@@ -268,14 +664,21 @@ Manager v2.0
   </div>
 </aside>
 
+<!-- Overlay fond sombre pour fermer la sidebar sur mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <main class="main">
   <header class="topbar">
+    <!-- Bouton hamburger visible seulement sur mobile -->
+    <button class="hamburger no-print" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="topbar-title" id="page-title">Tableau de bord</div>
     <div class="topbar-right">
       <div class="badge-notif" onclick="showAlerts()">🔔<span class="notif-dot"></span></div>
       <button class="btn btn-primary btn-sm" id="btn-action" onclick="handleAction()">+ Nouvelle commande</button>
       <button class="btn btn-danger btn-sm"
-              onclick="logoutAdmin()" href="../index.html"> Déconnexion</button>
+              onclick="logoutAdmin()"> Déconnexion</button>
     </div>
   </header>
 
@@ -293,7 +696,7 @@ margin-bottom:25px;
 src="../Image/image1.png"
 style="
 width:100%;
-height:90%;
+height:80%;
 object-fit:cover;
 ">
 
@@ -466,7 +869,7 @@ object-fit:cover;
               <div class="recu-row"><span class="text-muted">N° Reçu</span><span><strong>PAY-087</strong></span></div>
               <div class="recu-row"><span class="text-muted">Client</span><span>Koné Aminata</span></div>
               <div class="recu-row"><span class="text-muted">Article</span><span>Robe de soirée</span></div>
-              <div class="recu-total"><span>Montant payé</span><span style="background:linear-gradient(135deg,#784CF4,#FF3CAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">25 000 FCFA</span></div>
+              <div class="recu-total"><span>Montant payé</span><span style="background:linear-gradient(135deg,#784CF4,#FF3CAC);-webkit-backgroundclip:text;-webkit-text-fill-color:transparent;font-weight:700">25 000 FCFA</span></div>
               <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--mid);">Merci pour votre confiance 🙏<br>Atelier Fashion Couture</div>
             </div>
             <div style="text-align:center;margin-top:12px;display:flex;gap:8px;justify-content:center;">
@@ -1458,6 +1861,7 @@ function genererBilan(){
   w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Bilan Fashion Couture</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
     body{font-family:'Segoe UI',sans-serif;color:#1A0533;padding:32px;background:#fff;}
     h1{font-size:24px;color:#784CF4;margin-bottom:4px;}
     .sub{font-size:12px;color:#7C4DA0;margin-bottom:24px;}
@@ -2410,6 +2814,7 @@ function genererTachesHebdo(){
   w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Tâches hebdomadaires</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
     body{font-family:'Segoe UI',sans-serif;color:#1A0533;padding:32px;}
     h1{font-size:22px;color:#784CF4;margin-bottom:4px;}
     .sub{font-size:12px;color:#7C4DA0;margin-bottom:20px;}
@@ -2684,37 +3089,12 @@ initWeekInputs();
 renderAll(); // second pass après auto-detect
 </script>
 <script>
-
 // ===============================
 // VERIFICATION ADMIN
 // ===============================
 
-const adminAccess =
-localStorage.getItem('adminConnected');
 
-
-// SI PAS CONNECTE
-if(adminAccess !== 'true'){
-
-    alert('Accès refusé');
-
-    window.location.href = "../index.html";
-} 
-
-// ===============================
-// DECONNEXION ADMIN
-// ===============================
-function logoutAdmin(){
-
-    // supprimer sessions
-    localStorage.clear();
-
-    // message console
-    console.log('Déconnexion OK');
-
-    // retour accueil principal
-    window.location.href = "../index.html";
-}
+// logoutAdmin() définie dans le bloc login en haut du fichier
 // ===============================
 // AFFICHER MENSURATIONS CLIENT
 // ===============================
@@ -2723,50 +3103,23 @@ function voirMesures(clientId){
 
     // ouvrir page
     showView('mesures', null);
-
     // rechercher client
-    const client =
-    DB.clients.find(
-        c => c.id == clientId
-    );
+    const client = DB.clients.find(c => c.id == clientId);
 
-    if(!client){
-
-        alert('Client introuvable');
-
-        return;
-    }
+    if(!client){alert('Client introuvable');return;}
 
     // rechercher mesures
-    const mesure =
-    DB.mesures.find(
-        m => m.clientId == clientId
-    );
+    const mesure = DB.mesures.find(m => m.clientId == clientId);
 
     // zones
     const emptyState =
-    document.getElementById(
-        'mesure-empty-state'
-    );
-
+    document.getElementById('mesure-empty-state');
     const detailCard =
-    document.getElementById(
-        'mesure-detail-card'
-    );
+    document.getElementById('mesure-detail-card');
 
     // SI PAS DE MESURES
-    if(!mesure){
-
-        emptyState.style.display='flex';
-
-        detailCard.style.display='none';
-
-        return;
-    }
-
-    emptyState.style.display='none';
-
-    detailCard.style.display='block';
+    if(!mesure){emptyState.style.display='flex';detailCard.style.display='none';return;}
+    emptyState.style.display='none';detailCard.style.display='block';
 
 
     // AFFICHAGE
@@ -2788,88 +3141,18 @@ function voirMesures(clientId){
 
         <div class="mesures-body">
 
-            ${createMesureItem(
-                '👤',
-                'Type',
-                mesure.type || '--',
-                '#784CF4'
-            )}
-
-            ${createMesureItem(
-                '🫀',
-                'Poitrine',
-                mesure.poitrine || '--',
-                '#FF3CAC'
-            )}
-
-            ${createMesureItem(
-                '📏',
-                'Tour poitrine',
-                mesure.tour_poitrine || '--',
-                '#9C27B0'
-            )}
-
-            ${createMesureItem(
-                '↔',
-                'Épaules',
-                mesure.epaules || '--',
-                '#00C897'
-            )}
-
-            ${createMesureItem(
-                '👕',
-                'Longueur haut',
-                mesure.longueur_haut || '--',
-                '#3F51B5'
-            )}
-
-            ${createMesureItem(
-                '👗',
-                'Longueur robe',
-                mesure.longueur_robe || '--',
-                '#E91E63'
-            )}
-
-            ${createMesureItem(
-                '👖',
-                'Longueur pantalon',
-                mesure.pantalon || '--',
-                '#FF3B5C'
-            )}
-
-            ${createMesureItem(
-                '💪',
-                'Longueur manche',
-                mesure.bras || '--',
-                '#FF8C00'
-            )}
-
-            ${createMesureItem(
-                '🪡',
-                'Tour manche',
-                mesure.tour_manche || '--',
-                '#673AB7'
-            )}
-
-            ${createMesureItem(
-                '📐',
-                'Tour hanche',
-                mesure.hanches || '--',
-                '#5C6BFF'
-            )}
-
-            ${createMesureItem(
-                '🦵',
-                'Tour cuisse',
-                mesure.cuisse || '--',
-                '#009688'
-            )}
-
-            ${createMesureItem(
-                '🩳',
-                'Longueur jupe',
-                mesure.jupe || '--',
-                '#795548'
+            ${createMesureItem('👤','Type',mesure.type || '--','#784CF4')}
+            ${createMesureItem('🫀','Poitrine',mesure.poitrine || '--','#FF3CAC')}
+            ${createMesureItem('📏','Tour poitrine',mesure.tour_poitrine || '--','#9C27B0')}
+            ${createMesureItem('↔','Épaules',mesure.epaules || '--','#00C897')}
+            ${createMesureItem('👕','Longueur haut',mesure.longueur_haut || '--','#3F51B5')}
+            ${createMesureItem('👗','Longueur robe',mesure.longueur_robe || '--','#E91E63')}
+            ${createMesureItem('👖','Longueur pantalon',mesure.pantalon || '--','#FF3B5C')}
+            ${createMesureItem('💪','Longueur manche',mesure.bras || '--','#FF8C00')}
+            ${createMesureItem('🪡','Tour manche',mesure.tour_manche || '--','#673AB7')}
+            ${createMesureItem('📐','Tour hanche',mesure.hanches || '--','#5C6BFF')}
+            ${createMesureItem('🦵','Tour cuisse',mesure.cuisse || '--','#009688')}
+            ${createMesureItem('🩳','Longueur jupe',mesure.jupe || '--','#795548'
             )}
 
         </div>
@@ -2877,8 +3160,6 @@ function voirMesures(clientId){
     </div>
     `;
 }
-
-
 
 // ===============================
 // CARTE MENSURATION
@@ -2890,32 +3171,60 @@ function createMesureItem(
     value,
     color
 ){
-
     return `
-
     <div class="mesure-item">
-
         <div class="mesure-label">
-
             ${icon} ${label}
-
         </div>
-
         <div
-        class="mesure-value"
-        style="color:${color};">
-
+class="mesure-value"
+style="background:linear-gradient(135deg,${color},#FF3CAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
             ${value}
 
             ${label !== 'Type'
             ? '<span class="mesure-unit">cm</span>'
             : ''}
-
         </div>
-
     </div>
     `;
 }
+</script>
+
+<script>
+// ============================================
+// HAMBURGER MENU — Sidebar mobile
+// ============================================
+function toggleSidebar() {
+  const sidebar  = document.querySelector('aside.sidebar');
+  const overlay  = document.getElementById('sidebar-overlay');
+  const btn      = document.getElementById('hamburger-btn');
+  const isOpen   = sidebar.classList.contains('open');
+  if (isOpen) {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    btn.classList.remove('open');
+  } else {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function closeSidebar() {
+  document.querySelector('aside.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  const btn = document.getElementById('hamburger-btn');
+  if(btn) btn.classList.remove('open');
+}
+
+// Fermer la sidebar apres clic sur un item de nav (mobile)
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if(window.innerWidth <= 768) closeSidebar();
+    });
+  });
+});
 </script>
 </body>
 </html>

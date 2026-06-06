@@ -112,7 +112,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(13,13,13,0.95);backdrop-fi
 .creation-card{border-radius:18px;overflow:hidden;background:var(--creme);border:1px solid var(--border);box-shadow:0 2px 16px rgba(61,18,101,0.06);transition:all .25s;cursor:pointer;position:relative;}
 .creation-card:hover{transform:translateY(-5px);box-shadow:0 16px 48px rgba(61,18,101,0.14);}
 .creation-card:hover .creation-overlay{opacity:1;}
-.creation-img{height:clamp(140px,25vw,200px);display:flex;align-items:center;justify-content:center;font-size:clamp(48px,10vw,72px);background:linear-gradient(135deg,var(--creme),#FFE8F5);position:relative;overflow:hidden;.creation-img img{width:80%;height:80%;object-fit:contain;object-position:center;}
+.creation-img{height:clamp(140px,25vw,200px);display:flex;align-items:center;justify-content:center;font-size:clamp(48px,10vw,72px);background:linear-gradient(135deg,var(--creme),#FFE8F5);position:relative;overflow:hidden};.creation-img img{width:80%;height:80%;object-fit:contain;object-position:center;}
 .creation-overlay{position:absolute;inset:0;background:rgba(61,18,101,0.75);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s;}
 .creation-overlay span{color:#fff;font-size:13px;font-weight:600;border:1.5px solid rgba(255,255,255,0.6);padding:9px 20px;border-radius:30px;}
 .creation-info{padding:14px;}
@@ -1620,13 +1620,6 @@ total.toLocaleString()
     <path d="M12 3v12M8 11l4 4 4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/>
   </svg>
   Installer l'appli
-</button>
-  <svg viewBox="0 0 24 24">
-    <path d="M12 3v12M8 11l4 4 4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/>
-  </svg>
-  Installer l'appli
-</button>
-
 <script>
   let deferredPrompt;
 
@@ -1649,6 +1642,7 @@ total.toLocaleString()
   window.addEventListener('appinstalled', () => {
     document.getElementById('btn-install').style.display = 'none';
   });
+
 </script>
 </body>
 </html>
