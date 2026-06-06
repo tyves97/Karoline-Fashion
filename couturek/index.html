@@ -1,0 +1,3243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fashion Couture Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Manifest PWA -->
+<link rel="manifest" href="./manifest.json">
+<style>
+:root {
+  --gold:#FF3CAC;--gold-light:#FF8FD8;--gold-dark:#C4006E;
+  --cream:#F8F5FF;--dark:#1A0533;--mid:#7C4DA0;--light:#EEE6FF;--white:#FFFFFF;
+  --success:#00C897;--danger:#FF3B5C;--warning:#FF8C00;--info:#5C6BFF;
+  --border:rgba(140,80,220,0.2);--shadow:0 4px 32px rgba(100,0,180,0.15);
+  --accent1:#784CF4;--sidebar-bg:#140328;--sidebar-border:rgba(255,60,172,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;z-index:100;border-right:1px solid var(--sidebar-border);}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,60,172,0.15);background:linear-gradient(135deg,rgba(120,76,244,0.3),rgba(255,60,172,0.1));}
+.sidebar-logo .brand{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#FF3CAC;letter-spacing:.02em;line-height:1.2;}
+.sidebar-logo .sub{font-size:11px;color:rgba(255,143,216,0.6);letter-spacing:.12em;text-transform:uppercase;margin-top:4px;}
+.nav-section{padding:16px 12px 8px;}
+.nav-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,143,216,0.45);padding:0 12px;margin-bottom:6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:rgba(230,210,255,0.65);font-size:14px;transition:all .15s;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,60,172,0.12);color:#FF8FD8;}
+.nav-item.active{background:linear-gradient(90deg,rgba(255,60,172,0.25),rgba(120,76,244,0.15));color:#FF3CAC;font-weight:500;border-left:3px solid #FF3CAC;padding-left:9px;}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid rgba(255,60,172,0.12);display:flex;align-items:center;gap:10px;}
+.avatar-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;}
+.sidebar-user-info .name{font-size:13px;color:#EEE6FF;font-weight:500;}
+.sidebar-user-info .role{font-size:11px;color:rgba(255,143,216,0.55);}
+.main{margin-left:240px;min-height:100vh;}
+.topbar{background:var(--white);border-bottom:2px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 20px rgba(120,76,244,0.08);}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;background:linear-gradient(90deg,#784CF4,#FF3CAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.badge-notif{position:relative;cursor:pointer;padding:8px;border-radius:8px;}
+.badge-notif:hover{background:var(--light);}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:2px solid var(--white);}
+.content{padding:32px;}
+.view{display:none;} .view.active{display:block;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--white);border:1px solid rgba(120,76,244,0.15);border-radius:16px;padding:20px;position:relative;overflow:hidden;box-shadow:0 2px 16px rgba(120,76,244,0.06);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#784CF4,#FF3CAC);}
+.stat-card.green::before{background:linear-gradient(90deg,#00C897,#00D4FF);}
+.stat-card.red::before{background:linear-gradient(90deg,#FF3B5C,#FF6B35);}
+.stat-card.blue::before{background:linear-gradient(90deg,#5C6BFF,#784CF4);}
+.stat-label{font-size:12px;color:var(--mid);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;}
+.stat-value{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--dark);line-height:1;}
+.stat-delta{margin-top:8px;font-size:12px;color:#00C897;display:flex;align-items:center;gap:4px;}
+.card{background:var(--white);border:1px solid rgba(120,76,244,0.12);border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(120,76,244,0.05);}
+.card-header{padding:18px 24px;border-bottom:1px solid rgba(120,76,244,0.1);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(120,76,244,0.03),rgba(255,60,172,0.02));}
+.card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--dark);}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+thead th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);background:linear-gradient(135deg,#F5F0FF,#FFF0F8);border-bottom:1px solid rgba(120,76,244,0.1);}
+tbody tr{border-bottom:1px solid rgba(120,76,244,0.05);transition:background .1s;}
+tbody tr:hover{background:linear-gradient(90deg,rgba(120,76,244,0.03),rgba(255,60,172,0.02));}
+tbody tr:last-child{border-bottom:none;}
+td{padding:12px 16px;color:var(--dark);vertical-align:middle;}
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.04em;}
+.badge-success{background:#CCFFF0;color:#007A5A;}
+.badge-warning{background:#FFF0CC;color:#B85C00;}
+.badge-danger{background:#FFE0E8;color:#CC0033;}
+.badge-info{background:#E8E6FF;color:#4430CC;}
+.badge-gray{background:#F3F0FF;color:#5A4080;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;}
+.btn-primary{background:linear-gradient(135deg,#784CF4,#FF3CAC);color:white;box-shadow:0 4px 14px rgba(120,76,244,0.35);}
+.btn-primary:hover{background:linear-gradient(135deg,#6034E0,#D4006E);transform:translateY(-1px);box-shadow:0 4px 18px rgba(120,76,244,0.5);}
+.btn-outline{background:transparent;color:var(--mid);border:1px solid rgba(120,76,244,0.25);}
+.btn-outline:hover{background:var(--light);color:var(--accent1);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-whatsapp{background:#25D366;color:white;box-shadow:0 4px 14px rgba(37,211,102,0.35);}
+.btn-whatsapp:hover{background:#1da851;transform:translateY(-1px);}
+.form-grid{display:grid;gap:16px;}
+.form-grid-2{grid-template-columns:1fr 1fr;}
+.form-grid-3{grid-template-columns:1fr 1fr 1fr;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:12px;font-weight:600;color:var(--mid);letter-spacing:.06em;text-transform:uppercase;}
+.form-control{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--dark);background:var(--white);transition:border-color .15s;outline:none;}
+.form-control:focus{border-color:#784CF4;box-shadow:0 0 0 3px rgba(120,76,244,0.12);}
+select.form-control{cursor:pointer;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,18,8,0.6);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:16px;padding:32px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;border:1px solid var(--border);box-shadow:var(--shadow);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--dark);}
+.modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;color:var(--mid);background:none;border:none;font-size:18px;}
+.modal-close:hover{background:var(--light);}
+.search-bar{position:relative;flex:1;max-width:320px;}
+.search-bar input{width:100%;padding:9px 14px 9px 38px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--dark);background:var(--cream);font-family:'DM Sans',sans-serif;outline:none;}
+.search-bar input:focus{border-color:#784CF4;background:var(--white);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mid);font-size:15px;pointer-events:none;}
+.progress-bar{height:6px;border-radius:3px;background:var(--light);overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#784CF4,#FF3CAC);transition:width .3s;}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.gallery-item{border-radius:12px;overflow:hidden;background:var(--light);border:1px solid var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;}
+.gallery-img{flex:1;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--cream);}
+.gallery-info{padding:12px 14px;background:var(--white);border-top:1px solid var(--border);}
+.gallery-info .name{font-weight:500;font-size:14px;color:var(--dark);}
+.gallery-info .cat{font-size:12px;color:var(--mid);margin-top:2px;}
+.mesures-body{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.mesures-body{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:18px;
+
+margin-top:20px;
+}
+
+
+.mesure-item{
+
+background:linear-gradient(
+135deg,
+rgba(120,76,244,0.08),
+rgba(255,60,172,0.06)
+);
+
+border:1px solid
+rgba(120,76,244,0.15);
+
+border-radius:18px;
+
+padding:18px;
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+justify-content:center;
+
+text-align:center;
+
+transition:0.3s;
+
+box-shadow:
+0 4px 12px rgba(120,76,244,0.08);
+}
+
+
+.mesure-item:hover{
+
+transform:translateY(-4px);
+
+box-shadow:
+0 8px 20px rgba(120,76,244,0.18);
+
+background:linear-gradient(
+135deg,
+rgba(120,76,244,0.12),
+rgba(255,60,172,0.10)
+);}
+
+.tabs{display:flex;gap:4px;background:var(--light);border:1px solid rgba(120,76,244,0.15);border-radius:10px;padding:4px;margin-bottom:20px;}
+.tab{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--mid);transition:all .15s;border:none;background:none;}
+.tab.active{background:linear-gradient(135deg,#784CF4,#FF3CAC);color:white;box-shadow:0 2px 8px rgba(120,76,244,0.3);}
+.recu{background:var(--white);border:2px dashed rgba(120,76,244,0.3);border-radius:12px;padding:24px;max-width:360px;margin:0 auto;}
+.recu-header{text-align:center;margin-bottom:20px;}
+.recu-header h2{font-family:'Playfair Display',serif;font-size:22px;background:linear-gradient(135deg,#784CF4,#FF3CAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.recu-header p{font-size:12px;color:var(--mid);margin-top:4px;}
+.recu-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(120,76,244,0.15);font-size:14px;}
+.recu-row:last-of-type{border-bottom:none;}
+.recu-total{margin-top:12px;padding:12px;background:var(--light);border-radius:8px;display:flex;justify-content:space-between;font-weight:600;}
+.mini-chart{display:flex;align-items:flex-end;gap:6px;height:80px;}
+.mini-bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#FF3CAC,#784CF4);min-width:20px;}
+.mini-labels{display:flex;gap:6px;margin-top:4px;}
+.mini-label{flex:1;font-size:10px;color:var(--mid);text-align:center;}
+.alert{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:10px;font-size:13px;margin-bottom:12px;}
+.alert-warning{background:#FFF8E6;border:1px solid #FFD166;color:#7A4800;}
+.alert-danger{background:#FFF0F3;border:1px solid #FFB3C1;color:#8B0025;}
+.divider{height:1px;background:rgba(120,76,244,0.1);margin:24px 0;}
+.flex{display:flex;} .gap-8{gap:8px;} .gap-12{gap:12px;} .gap-16{gap:16px;}
+.items-center{align-items:center;} .justify-between{justify-content:space-between;}
+.mb-24{margin-bottom:24px;} .mb-16{margin-bottom:16px;}
+.text-muted{color:var(--mid);} .font-serif{font-family:'Playfair Display',serif;}
+/* Matériaux list in modal */
+.mat-row{display:grid;grid-template-columns:1fr auto auto 120px 36px;gap:8px;align-items:center;padding:10px 14px;background:var(--cream);border-radius:10px;margin-bottom:8px;border:1px solid rgba(120,76,244,0.1);}
+.mat-row:hover{background:var(--light);}
+/* Bilan PDF styles */
+@media print{.no-print{display:none!important;} body{margin:0;} .print-only{display:block!important;}}
+.print-only{display:none;}
+/* Photo upload */
+.photo-upload-zone{border:2px dashed rgba(120,76,244,0.3);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cream);}
+.photo-upload-zone:hover{border-color:#784CF4;background:var(--light);}
+.photo-upload-zone input[type=file]{display:none;}
+.photo-thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;border:2px solid rgba(120,76,244,0.2);}
+.photo-thumb-lg{width:120px;height:120px;border-radius:14px;object-fit:cover;border:3px solid rgba(120,76,244,0.2);}
+.client-avatar-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(120,76,244,0.2);}
+/* Tâches hebdo */
+.tache-card{background:var(--white);border:1px solid rgba(120,76,244,0.12);border-radius:12px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:box-shadow .15s;}
+.tache-card:hover{box-shadow:0 2px 14px rgba(120,76,244,0.1);}
+.tache-card.retard{border-left:4px solid #FF3B5C;background:#FFF8F9;}
+.tache-card.urgent{border-left:4px solid #FF8C00;background:#FFFBF5;}
+.tache-card.ok{border-left:4px solid #00C897;background:#F5FFFB;}
+
+/* ============================================
+   RESPONSIVE MOBILE — hamburger + sidebar
+   ============================================ */
+
+/* Bouton hamburger (caché sur desktop) */
+.hamburger{
+  display:none;
+  flex-direction:column;
+  gap:5px;
+  cursor:pointer;
+  padding:8px;
+  border-radius:8px;
+  background:none;
+  border:none;
+  margin-right:8px;
+}
+.hamburger span{
+  display:block;width:22px;height:2px;
+  background:#784CF4;border-radius:2px;
+  transition:all .25s;
+}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* Overlay fond sombre quand sidebar ouverte sur mobile */
+.sidebar-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.5);
+  z-index:99;
+}
+.sidebar-overlay.open{display:block;}
+
+@media (max-width: 768px) {
+
+  /* Sidebar glissante depuis la gauche */
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:200;
+    width:260px;
+  }
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  /* Main prend toute la largeur */
+  .main{
+    margin-left:0 !important;
+    width:100%;
+  }
+
+  /* Topbar : afficher le hamburger */
+  .hamburger{display:flex;}
+
+  /* Topbar layout ajusté */
+  .topbar{
+    padding:0 14px;
+    gap:8px;
+  }
+  .topbar-title{font-size:15px;}
+  .topbar-right{gap:8px;}
+  .topbar-right .btn-sm{padding:6px 10px;font-size:12px;}
+
+  /* Contenu avec moins de padding */
+  .content{padding:16px;}
+
+  /* Stats : 2 colonnes sur mobile */
+  .stats-grid{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat-value{font-size:22px;}
+
+  /* Graphiques en colonne */
+  .chart-row{grid-template-columns:1fr;}
+
+  /* Galerie : 2 colonnes */
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+
+  /* Tables : scroll horizontal */
+  .card{overflow-x:auto;}
+  table{min-width:560px;}
+
+  /* Bilan PDF grid en colonne */
+  #view-dashboard .card > div > div[style*="grid-template-columns:repeat(4"]{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  /* Form grids en colonne */
+  .form-grid-2,.form-grid-3{grid-template-columns:1fr;}
+
+  /* Modales plein écran */
+  .modal{
+    width:100% !important;
+    max-width:100vw !important;
+    max-height:100vh !important;
+    border-radius:0;
+    padding:20px 16px;
+    margin:0;
+  }
+  .modal-overlay.open{
+    align-items:flex-end;
+  }
+
+  /* Mat-row en colonne */
+  .mat-row{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+
+  /* Image déco moins haute */
+  div[style*="height:260px"]{
+    height:140px !important;
+  }
+
+  /* Mesures : 2 col */
+  .mesures-body{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  /* Login screen padding mobile */
+  #admin-login-screen > div{
+    padding:28px 20px !important;
+    margin:12px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .stats-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:1fr;}
+  .topbar-title{font-size:13px;}
+}
+</style>
+<!-- Service Worker : silencieux en preview, actif sur serveur réel -->
+<script>
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  if (location.hostname === '' || location.hostname.includes('claudeusercontent.com')) return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('../service-worker.js')
+      .then(function(r){ console.log('[SW] OK :', r.scope); })
+      .catch(function(e){ console.error('[SW] Erreur :', e); });
+  });
+})();
+</script>
+</head>
+<body>
+
+<!-- ================================================
+     ÉCRAN LOGIN ADMIN — TÉLÉPHONE OU EMAIL
+     ================================================ -->
+<div id="admin-login-screen" style="
+  display:flex;
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#140328 0%,#1C1033 50%,#3D1265 100%);
+  align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;
+">
+  <div style="
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,60,172,0.25);
+    border-radius:24px;
+    padding:44px 36px;
+    width:100%;max-width:420px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 24px 80px rgba(0,0,0,0.5);
+    text-align:center;
+  ">
+    <!-- Logo + titre -->
+    <div style="font-size:44px;margin-bottom:6px;">🔐</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#FF3CAC;margin-bottom:4px;">Espace Admin</div>
+    <div style="font-size:11px;color:rgba(255,143,216,0.55);letter-spacing:.14em;text-transform:uppercase;margin-bottom:28px;">Karoline Fashion Couture</div>
+
+    <!-- Message erreur -->
+    <div id="admin-login-err" style="
+      display:none;
+      background:rgba(255,59,92,0.15);
+      border:1px solid rgba(255,59,92,0.4);
+      color:#FF8FA3;border-radius:10px;
+      padding:10px 14px;font-size:13px;
+      margin-bottom:16px;text-align:left;
+    "></div>
+
+    <!-- Menu déroulant : choisir mode connexion -->
+    <div style="margin-bottom:20px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Mode de connexion</label>
+      <select id="adm-mode" onchange="toggleAdminMode()" style="
+        width:100%;padding:12px 16px;
+        border:1px solid rgba(255,60,172,0.3);
+        border-radius:10px;
+        background:rgba(120,76,244,0.15);
+        color:#EEE6FF;font-size:14px;
+        font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+        appearance:auto;-webkit-appearance:auto;
+      ">
+        <option value="tel">📱 Connexion par téléphone</option>
+        <option value="email">✉️ Connexion par email</option>
+      </select>
+    </div>
+
+    <!-- Champ TÉLÉPHONE -->
+    <div id="adm-tel-block" style="margin-bottom:16px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Numéro de téléphone</label>
+      <div style="display:flex;gap:8px;">
+        <select id="adm-country" style="
+          padding:12px 10px;
+          border:1px solid rgba(255,60,172,0.3);
+          border-radius:10px;
+          background:rgba(255,255,255,0.08);
+          color:#EEE6FF;font-size:14px;
+          font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+        ">
+          <option value="+225">🇨🇮 +225</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+221">🇸🇳 +221</option>
+          <option value="+229">🇧🇯 +229</option>
+          <option value="+1">🇺🇸 +1</option>
+        </select>
+        <input id="adm-tel" type="tel" placeholder="07 57 89 73 4" style="
+          flex:1;padding:12px 16px;
+          border:1px solid rgba(255,60,172,0.3);
+          border-radius:10px;
+          background:rgba(255,255,255,0.08);
+          color:#EEE6FF;font-size:14px;
+          font-family:'DM Sans',sans-serif;outline:none;
+        " onkeydown="if(event.key==='Enter')document.getElementById('adm-pass').focus()">
+      </div>
+    </div>
+
+    <!-- Champ EMAIL (caché par défaut) -->
+    <div id="adm-email-block" style="display:none;margin-bottom:16px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Adresse email</label>
+      <input id="adm-email" type="email" placeholder="tyves97@gmail.com" style="
+        width:100%;padding:12px 16px;
+        border:1px solid rgba(255,60,172,0.3);
+        border-radius:10px;
+        background:rgba(255,255,255,0.08);
+        color:#EEE6FF;font-size:14px;
+        font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;
+      " onkeydown="if(event.key==='Enter')document.getElementById('adm-pass').focus()">
+    </div>
+
+    <!-- Mot de passe -->
+    <div style="margin-bottom:24px;text-align:left;">
+      <label style="font-size:11px;font-weight:600;color:rgba(255,143,216,0.7);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Mot de passe</label>
+      <div style="position:relative;">
+        <input id="adm-pass" type="password" placeholder="••••••••" style="
+          width:100%;padding:12px 16px;
+          border:1px solid rgba(255,60,172,0.3);
+          border-radius:10px;
+          background:rgba(255,255,255,0.08);
+          color:#EEE6FF;font-size:14px;
+          font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;
+        " onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <span onclick="toggleAdminPass()" style="
+          position:absolute;right:14px;top:50%;transform:translateY(-50%);
+          cursor:pointer;font-size:16px;opacity:0.6;
+        ">👁</span>
+      </div>
+    </div>
+
+    <!-- Bouton connexion -->
+    <button onclick="doAdminLogin()" style="
+      width:100%;padding:14px;
+      background:linear-gradient(135deg,#784CF4,#FF3CAC);
+      color:white;border:none;border-radius:12px;
+      font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+      cursor:pointer;
+      box-shadow:0 8px 24px rgba(255,60,172,0.35);
+      transition:all .2s;
+    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+      Se connecter →
+    </button>
+
+    <div style="margin-top:18px;">
+      <a href="./index.html" style="font-size:13px;color:rgba(255,143,216,0.4);text-decoration:none;">← Retour au site</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+// COMPTES ADMIN — modifiez ici vos identifiants
+// =====================================================
+const ADMIN_ACCOUNTS = [
+  { tel: '+225075789734', pass: btoa('Admin225') },
+];
+const ADMIN_EMAIL_ADDR = 'tyves97@gmail.com';
+const ADMIN_EMAIL_PASS = btoa('Admin97');
+
+// Basculer entre téléphone et email
+function toggleAdminMode() {
+  const mode = document.getElementById('adm-mode').value;
+  document.getElementById('adm-tel-block').style.display   = mode === 'tel'   ? 'block' : 'none';
+  document.getElementById('adm-email-block').style.display = mode === 'email' ? 'block' : 'none';
+}
+
+// Afficher/masquer mot de passe
+function toggleAdminPass() {
+  const inp = document.getElementById('adm-pass');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function showAdminErr(msg) {
+  const err = document.getElementById('admin-login-err');
+  err.textContent = '⚠ ' + msg;
+  err.style.display = 'block';
+}
+
+function checkAdminSession() {
+  // localStorage survit aux redirections (GitHub Pages, Netlify, Live Server)
+  var auth = localStorage.getItem('adminAuth') === 'true'
+          || sessionStorage.getItem('adminAuth') === 'true';
+  if (auth) {
+    // Synchroniser les deux storages
+    localStorage.setItem('adminAuth', 'true');
+    sessionStorage.setItem('adminAuth', 'true');
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.querySelector('aside.sidebar').style.display = '';
+    document.querySelector('main.main').style.display = '';
+    if (typeof renderAll === 'function') renderAll();
+    if (typeof autoDetectRetards === 'function') autoDetectRetards();
+    if (typeof toggleBilanDates === 'function') toggleBilanDates();
+    if (typeof initWeekInputs === 'function') initWeekInputs();
+  } else {
+    document.getElementById('admin-login-screen').style.display = 'flex';
+    document.querySelector('aside.sidebar').style.display = 'none';
+    document.querySelector('main.main').style.display = 'none';
+  }
+}
+
+function doAdminLogin() {
+  const mode = document.getElementById('adm-mode').value;
+  const pass = document.getElementById('adm-pass').value;
+  const err  = document.getElementById('admin-login-err');
+  err.style.display = 'none';
+
+  if (!pass) { showAdminErr('Entrez votre mot de passe'); return; }
+
+  let ok = false;
+
+  if (mode === 'tel') {
+    // --- Connexion par téléphone ---
+    const country  = document.getElementById('adm-country').value;
+    const num      = document.getElementById('adm-tel').value.trim().replace(/\s/g, '');
+    if (!num) { showAdminErr('Entrez votre numéro de téléphone'); return; }
+    const tel_full = country + num;
+
+    // Vérification comptes hard-codés
+    ok = !!ADMIN_ACCOUNTS.find(a => a.tel === tel_full && a.pass === btoa(pass));
+
+    // Vérification localStorage (créé depuis index.html)
+    if (!ok) {
+      const users = JSON.parse(localStorage.getItem('fc_users') || '[]');
+      ok = !!users.find(u => u.tel_full === tel_full && u.pass === btoa(pass) && u.role === 'admin');
+    }
+
+  } else {
+    // --- Connexion par email ---
+    const email = document.getElementById('adm-email').value.trim().toLowerCase();
+    if (!email) { showAdminErr('Entrez votre adresse email'); return; }
+
+    // Vérification email hard-codé
+    ok = (email === ADMIN_EMAIL_ADDR && btoa(pass) === ADMIN_EMAIL_PASS);
+
+    // Vérification localStorage
+    if (!ok) {
+      const users = JSON.parse(localStorage.getItem('fc_users') || '[]');
+      ok = !!users.find(u => u.email && u.email.toLowerCase() === email && u.pass === btoa(pass) && u.role === 'admin');
+    }
+  }
+
+  if (ok) {
+    localStorage.setItem('adminAuth', 'true');
+    sessionStorage.setItem('adminAuth', 'true');
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.querySelector('aside.sidebar').style.display = '';
+    document.querySelector('main.main').style.display = '';
+    renderAll();
+    if (typeof autoDetectRetards === 'function') autoDetectRetards();
+    if (typeof toggleBilanDates === 'function') toggleBilanDates();
+    if (typeof initWeekInputs === 'function') initWeekInputs();
+  } else {
+    showAdminErr('Identifiant ou mot de passe incorrect');
+  }
+}
+
+// logoutAdmin() définie dans le bloc login en haut du fichier
+// ===============================
+// DECONNEXION ADMIN
+// ===============================
+
+function logoutAdmin(){
+  // Nettoyer les deux storages
+  localStorage.removeItem('adminAuth');
+  localStorage.removeItem('adminConnected');
+  sessionStorage.removeItem('adminAuth');
+  // Retour à la page principale
+  window.location.href = '../index.html';
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  document.querySelector('aside.sidebar').style.display = 'none';
+  document.querySelector('main.main').style.display   = 'none';
+  checkAdminSession();
+});
+</script>
+<!-- ================================================ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img
+src="../Image/logoSarra.png" alt="Logo"
+style="
+width:90px;
+height:90px;
+object-fit:cover;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+margin:0 auto 12px auto;
+border:2px solid rgba(255,255,255,0.2);
+box-shadow:0 2px 10px rgba(0,0,0,0.2);
+">
+    <div
+class="brand"
+style="
+text-align:center;
+width:100%;
+">
+Karoline Fashion Couture
+</div>
+    <div
+class="sub"
+style="
+text-align:center;
+width:100%;
+">
+Manager v2.0
+</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item active" onclick="showView('dashboard',this)"><span class="icon">📊</span> Tableau de bord</div>
+    <div class="nav-item" onclick="showView('clients',this)"><span class="icon">👥</span> Clients</div>
+    <div class="nav-item" onclick="showView('commandes',this)"><span class="icon">📋</span> Commandes</div>
+    <div class="nav-item" onclick="showView('depenses',this)"><span class="icon">💸</span> Dépenses & Bénéfices</div>
+    <div class="nav-item" onclick="showView('taches',this)"><span class="icon">📅</span> Tâches hebdomadaires</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Gestion</div>
+    <div class="nav-item" onclick="showView('mesures',this)"><span class="icon">📐</span> Mensurations</div>
+    <div class="nav-item" onclick="showView('paiements',this)"><span class="icon">💰</span> Paiements</div>
+    <div class="nav-item" onclick="showView('galerie',this)"><span class="icon">🖼️</span> Galerie</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Système</div>
+    <div class="nav-item" onclick="showView('rapports',this)"><span class="icon">📈</span> Rapports</div>
+    <div class="nav-item" onclick="showView('comptes',this)"><span class="icon">🔐</span> Comptes clients</div>
+    <div class="nav-item" onclick="alert('Paramètres en développement')"><span class="icon">⚙️</span> Paramètres</div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="avatar-sm">AD</div>
+    <div class="sidebar-user-info">
+      <div class="name">Administrateur</div>
+      <div class="role">Accès complet</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Overlay fond sombre pour fermer la sidebar sur mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<main class="main">
+  <header class="topbar">
+    <!-- Bouton hamburger visible seulement sur mobile -->
+    <button class="hamburger no-print" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-title" id="page-title">Tableau de bord</div>
+    <div class="topbar-right">
+      <div class="badge-notif" onclick="showAlerts()">🔔<span class="notif-dot"></span></div>
+      <button class="btn btn-primary btn-sm" id="btn-action" onclick="handleAction()">+ Nouvelle commande</button>
+      <button class="btn btn-danger btn-sm"
+              onclick="logoutAdmin()"> Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- ===== image deco ===== -->
+     <div style="
+width:100%;
+height:260px;
+overflow:hidden;
+border-radius:20px;
+margin-bottom:25px;
+">
+
+<img
+src="../Image/image1.png"
+style="
+width:100%;
+height:80%;
+object-fit:cover;
+">
+
+</div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="view active" id="view-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Commandes totales</div><div class="stat-value" id="stat-total">—</div><div class="stat-delta" id="stat-total-delta"></div></div>
+        <div class="stat-card green"><div class="stat-label">Livrées</div><div class="stat-value" id="stat-livrees" style="color:var(--success)">—</div><div class="stat-delta" id="stat-livrees-delta" style="color:var(--success)"></div></div>
+        <div class="stat-card red"><div class="stat-label">En retard</div><div class="stat-value" id="stat-retard" style="color:var(--danger)">—</div><div class="stat-delta" id="stat-retard-delta" style="color:var(--danger)"></div></div>
+        <div class="stat-card blue"><div class="stat-label">Chiffre d'affaires</div><div class="stat-value" id="stat-ca" style="font-size:22px">—</div><div class="stat-delta" style="color:var(--info)">F CFA total</div></div>
+      </div>
+
+      <!-- PANNEAU RETARDS DYNAMIQUE -->
+      <div id="retards-panel" style="margin-bottom:20px;"></div>
+
+      <!-- BILAN PDF SECTION -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <div class="card-title">📄 Bilan & Rapport PDF</div>
+          <span style="font-size:12px;color:var(--mid);">Export du bilan de l'atelier</span>
+        </div>
+        <div style="padding:20px 24px;">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr) auto auto;gap:12px;align-items:end;">
+            <div class="form-group">
+              <label class="form-label">Période</label>
+              <select class="form-control" id="bilan-periode" onchange="toggleBilanDates()">
+                <option value="hebdo">Hebdomadaire</option>
+                <option value="mensuel" selected>Mensuel</option>
+                <option value="annuel">Annuel</option>
+                <option value="libre">Dates libres</option>
+              </select>
+            </div>
+            <div class="form-group" id="bilan-date-debut-wrap">
+              <label class="form-label">Date début</label>
+              <input type="date" class="form-control" id="bilan-date-debut">
+            </div>
+            <div class="form-group" id="bilan-date-fin-wrap">
+              <label class="form-label">Date fin</label>
+              <input type="date" class="form-control" id="bilan-date-fin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Statut commandes</label>
+              <select class="form-control" id="bilan-statut">
+                <option value="tous">Tous</option>
+                <option value="livree">Livrées seulement</option>
+                <option value="en_cours">En cours seulement</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recherche client</label>
+              <input type="text" class="form-control" id="bilan-client" placeholder="Nom du client...">
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="previewBilan()" style="white-space:nowrap;">👁 Aperçu</button>
+              <button class="btn btn-primary btn-sm" onclick="genererBilan()" style="white-space:nowrap;">🖨️ Imprimer PDF</button>
+            </div>
+          </div>
+          <div id="bilan-preview" style="display:none;margin-top:20px;"></div>
+        </div>
+      </div>
+
+      <!-- TÂCHES HEBDOMADAIRES CARD in Dashboard -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <div class="card-title">📅 Tâches de la semaine</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span id="semaine-label" style="font-size:12px;color:var(--mid);"></span>
+            <button class="btn btn-outline btn-sm" onclick="genererTachesHebdo()" style="white-space:nowrap;">🖨️ Exporter PDF</button>
+            <button class="btn btn-primary btn-sm" onclick="showView('taches',null)" style="white-space:nowrap;">Voir tout →</button>
+          </div>
+        </div>
+        <div id="dash-taches-list" style="padding:12px 16px;"></div>
+      </div>
+
+      <div class="chart-row">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Commandes récentes</div><button class="btn btn-outline btn-sm" onclick="showView('commandes',null)">Voir tout</button></div>
+          <table><thead><tr><th>Client</th><th>Vêtement</th><th>Livraison</th><th>Statut</th></tr></thead><tbody id="dash-commandes"></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Activité mensuelle</div></div>
+          <div style="padding:20px 24px;">
+            <div class="mini-chart" id="mini-chart"></div>
+            <div class="mini-labels" id="mini-labels"></div>
+            <div class="divider"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="background:var(--cream);border-radius:8px;padding:12px;text-align:center;"><div style="font-size:11px;color:var(--mid);margin-bottom:4px;text-transform:uppercase;">Clients actifs</div><div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;">34</div></div>
+              <div style="background:var(--cream);border-radius:8px;padding:12px;text-align:center;"><div style="font-size:11px;color:var(--mid);margin-bottom:4px;text-transform:uppercase;">Taux livraison</div><div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--success)">94%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Commandes en cours — Avancement</div></div>
+        <div style="padding:0 24px 8px;"><table><thead><tr><th>Réf.</th><th>Client</th><th>Vêtement</th><th>Couturier</th><th>Avancement</th><th>Date limite</th><th>Action</th></tr></thead><tbody id="avancement-table"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== CLIENTS ===== -->
+    <div class="view" id="view-clients">
+      <div class="flex items-center justify-between mb-24">
+        <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="client-search" placeholder="Rechercher un client..." oninput="filterClients()"></div>
+        <button class="btn btn-primary" onclick="openModal('modal-client')">+ Nouveau client</button>
+      </div>
+      <div class="card"><table><thead><tr><th>#</th><th>Nom complet</th><th>Téléphone</th><th>Commandes</th><th>Total payé</th><th>Actions</th></tr></thead><tbody id="clients-table"></tbody></table></div>
+    </div>
+
+    <!-- ===== COMMANDES ===== -->
+    <div class="view" id="view-commandes">
+      <!-- Retards toujours visibles en haut -->
+      <div id="retards-panel-cmd" style="margin-bottom:16px;"></div>
+      <div class="flex items-center justify-between mb-24">
+        <div class="flex gap-8">
+          <button class="tab active" onclick="filterCommandes('all',this)">Toutes</button>
+          <button class="tab" onclick="filterCommandes('en_cours',this)">En cours</button>
+          <button class="tab" onclick="filterCommandes('livree',this)">Livrées</button>
+          <button class="tab" onclick="filterCommandes('retard',this)">En retard</button>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-commande')">+ Nouvelle commande</button>
+      </div>
+      <div class="card"><table><thead><tr><th>N° Cmd</th><th>Client</th><th>Vêtement</th><th>Dépôt</th><th>Livraison</th><th>Montant</th><th>Payé</th><th>Photos</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="commandes-table"></tbody></table></div>
+    </div>
+
+    <!-- ===== MENSURATIONS ===== -->
+    <div class="view" id="view-mesures">
+      <div class="flex items-center justify-between mb-24">
+        <div style="font-size:13px;color:var(--mid)">Sélectionnez un client puis cliquez sur 👁 pour voir ses mesures</div>
+        <button class="btn btn-primary" onclick="openModal('modal-mesure')">+ Enregistrer mesures</button>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
+        <div class="card" style="border-radius:16px;overflow:hidden;">
+          <div class="card-header" style="padding:14px 18px;"><div class="card-title" style="font-size:14px;">Clients</div><span id="mesure-count" style="font-size:12px;color:var(--mid);"></span></div>
+          <div id="mesure-client-list" style="padding:8px;"></div>
+        </div>
+        <div id="mesure-detail-panel">
+          <div id="mesure-empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;background:var(--white);border-radius:16px;border:1px solid rgba(120,76,244,0.12);">
+            <div style="font-size:52px;margin-bottom:16px;opacity:.3;">📐</div>
+            <div style="font-size:15px;font-weight:500;color:var(--mid);">Aucun client sélectionné</div>
+            <div style="font-size:13px;color:var(--mid);margin-top:6px;text-align:center;">Cliquez sur 👁 dans la liste<br>pour afficher les mensurations</div>
+          </div>
+          <div id="mesure-detail-card" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAIEMENTS ===== -->
+    <div class="view" id="view-paiements">
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-label">Total encaissé</div><div class="stat-value" style="font-size:22px" id="pay-total">—</div><div class="stat-delta">F CFA</div></div>
+        <div class="stat-card green"><div class="stat-label">Avances reçues</div><div class="stat-value" style="font-size:22px;color:var(--success)" id="pay-avances">—</div><div class="stat-delta" style="color:var(--success)">F CFA</div></div>
+        <div class="stat-card red"><div class="stat-label">Soldes restants</div><div class="stat-value" style="font-size:22px;color:var(--danger)" id="pay-soldes">—</div><div class="stat-delta" style="color:var(--danger)">F CFA à encaisser</div></div>
+        <div class="stat-card blue"><div class="stat-label">Transactions</div><div class="stat-value" style="font-size:22px;color:var(--info)" id="pay-nb">—</div><div class="stat-delta" style="color:var(--info)">ce mois</div></div>
+      </div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><div class="card-title">Mobile Money — Encaissements par canal</div><span style="font-size:12px;color:var(--mid);background:var(--light);padding:4px 10px;border-radius:20px;">Vue Administrateur</span></div>
+        <div style="padding:20px 24px;"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;" id="mobile-money-stats"></div></div>
+      </div>
+      <div class="chart-row">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Historique des paiements</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-paiement')">+ Paiement</button></div>
+          <table><thead><tr><th>Date</th><th>Client</th><th>Article</th><th>Payé</th><th>Restant</th><th>Mode</th><th>Actions</th></tr></thead><tbody id="paiements-table"></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Aperçu reçu</div></div>
+          <div style="padding:20px;">
+            <div class="recu" id="recu-preview">
+              <div class="recu-header"><h2>Fashion Couture</h2><p>Reçu de paiement</p></div>
+              <div class="recu-row"><span class="text-muted">N° Reçu</span><span><strong>PAY-087</strong></span></div>
+              <div class="recu-row"><span class="text-muted">Client</span><span>Koné Aminata</span></div>
+              <div class="recu-row"><span class="text-muted">Article</span><span>Robe de soirée</span></div>
+              <div class="recu-total"><span>Montant payé</span><span style="background:linear-gradient(135deg,#784CF4,#FF3CAC);-webkit-backgroundclip:text;-webkit-text-fill-color:transparent;font-weight:700">25 000 FCFA</span></div>
+              <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--mid);">Merci pour votre confiance 🙏<br>Atelier Fashion Couture</div>
+            </div>
+            <div style="text-align:center;margin-top:12px;display:flex;gap:8px;justify-content:center;">
+              <button class="btn btn-outline btn-sm" onclick="imprimerRecu()">🖨️ Imprimer</button>
+              <button class="btn btn-whatsapp btn-sm" id="btn-wa-recu" onclick="sendWhatsAppRecu()">📲 WhatsApp</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DÉPENSES & BÉNÉFICES ===== -->
+    <!-- ===== COMPTES CLIENTS ===== -->
+    <div class="view" id="view-comptes">
+      <div class="flex items-center justify-between mb-24">
+        <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="comptes-search" placeholder="Rechercher un compte..." oninput="renderComptes()"></div>
+        <button class="btn btn-primary" onclick="exportComptes()">📥 Exporter</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔐 Historique des comptes clients</div>
+          <span id="comptes-count" style="font-size:13px;color:var(--mid);"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nom complet</th>
+              <th>Contact</th>
+              <th>Mode inscription</th>
+              <th>Commandes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="comptes-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="view" id="view-depenses">
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card"><div class="stat-label">Total revenus</div><div class="stat-value" id="dep-total-revenus" style="font-size:22px">—</div><div class="stat-delta">F CFA encaissés</div></div>
+        <div class="stat-card red"><div class="stat-label">Total dépenses</div><div class="stat-value" id="dep-total-depenses" style="font-size:22px;color:var(--danger)">—</div><div class="stat-delta" style="color:var(--danger)">F CFA matériaux</div></div>
+        <div class="stat-card green"><div class="stat-label">Bénéfice net</div><div class="stat-value" id="dep-benefice" style="font-size:22px;color:var(--success)">—</div><div class="stat-delta" style="color:var(--success)" id="dep-marge">—</div></div>
+        <div class="stat-card blue"><div class="stat-label">Articles analysés</div><div class="stat-value" id="dep-nb-articles" style="font-size:22px;color:var(--info)">—</div><div class="stat-delta" style="color:var(--info)">commandes saisies</div></div>
+      </div>
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header"><div class="card-title">Analyse bénéfice par article</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-depense')">+ Enregistrer dépense</button></div>
+        <table><thead><tr><th>Commande</th><th>Article</th><th>Client</th><th>Prix fixé</th><th>Dépenses</th><th>Bénéfice</th><th>Marge</th></tr></thead><tbody id="depenses-table"></tbody></table>
+      </div>
+      <div class="chart-row">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Détail matériaux payés</div></div>
+          <table><thead><tr><th>Date</th><th>Commande</th><th>Matériau</th><th>Qté</th><th>Montant</th></tr></thead><tbody id="materiaux-table"></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Répartition des dépenses</div></div>
+          <div style="padding:20px 24px;" id="dep-repartition"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TÂCHES HEBDOMADAIRES ===== -->
+    <div class="view" id="view-taches">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:13px;color:var(--mid);margin-bottom:6px;">Semaine de travail sélectionnée</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="date" class="form-control" id="tache-semaine-debut" style="width:160px;" onchange="renderTaches()">
+            <span style="color:var(--mid);">→</span>
+            <input type="date" class="form-control" id="tache-semaine-fin" style="width:160px;" onchange="renderTaches()">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="semaineSuivante()">Semaine suivante ▶</button>
+          <button class="btn btn-outline btn-sm" onclick="genererTachesHebdo()">🖨️ PDF tâches</button>
+          <button class="btn btn-primary btn-sm" onclick="sendTachesWhatsApp()">📲 Envoyer WhatsApp</button>
+        </div>
+      </div>
+
+      <!-- Récap stats -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-label">Commandes semaine</div><div class="stat-value" id="t-nb-total">—</div><div class="stat-delta">À traiter</div></div>
+        <div class="stat-card green"><div class="stat-label">Livrées</div><div class="stat-value" id="t-nb-livrees" style="color:var(--success)">—</div><div class="stat-delta" style="color:var(--success)">✓ Terminées</div></div>
+        <div class="stat-card red"><div class="stat-label">En retard</div><div class="stat-value" id="t-nb-retard" style="color:var(--danger)">—</div><div class="stat-delta" style="color:var(--danger)">⚠ Action requise</div></div>
+        <div class="stat-card blue"><div class="stat-label">Livraisons prévues</div><div class="stat-value" id="t-nb-prevues" style="color:var(--info)">—</div><div class="stat-delta" style="color:var(--info)">Cette semaine</div></div>
+      </div>
+
+      <!-- Liste tâches -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header">
+          <div class="card-title">Liste des tâches — Commandes en cours & retard</div>
+          <div style="display:flex;gap:6px;">
+            <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#FF3B5C;"><span style="width:10px;height:10px;background:#FF3B5C;border-radius:2px;display:inline-block;"></span>Retard</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#FF8C00;margin-left:8px;"><span style="width:10px;height:10px;background:#FF8C00;border-radius:2px;display:inline-block;"></span>Urgent (≤3j)</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#00C897;margin-left:8px;"><span style="width:10px;height:10px;background:#00C897;border-radius:2px;display:inline-block;"></span>Normal</span>
+          </div>
+        </div>
+        <div id="taches-list" style="padding:12px 16px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== GALERIE ===== -->
+    <div class="view" id="view-galerie">
+      <div class="flex items-center justify-between mb-24">
+        <div class="tabs" style="margin-bottom:0">
+          <button class="tab active" onclick="filterGalerie('tous',this)">Tous</button>
+          <button class="tab" onclick="filterGalerie('homme',this)">Homme</button>
+          <button class="tab" onclick="filterGalerie('femme',this)">Femme</button>
+          <button class="tab" onclick="filterGalerie('enfant',this)">Enfant</button>
+          <button class="tab" onclick="filterGalerie('mariage',this)">Mariage</button>
+          <button class="tab" onclick="filterGalerie('traditionnel',this)">Traditionnel</button>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-galerie')">+ Ajouter création</button>
+      </div>
+      <div class="gallery-grid" id="gallery-grid"></div>
+    </div>
+
+    <!-- ===== RAPPORTS ===== -->
+    <div class="view" id="view-rapports">
+      <div class="stats-grid mb-24">
+        <div class="stat-card"><div class="stat-label">Commandes / mois</div><div class="stat-value">23</div><div class="stat-delta">↑ +4 vs mois dernier</div></div>
+        <div class="stat-card green"><div class="stat-label">Taux satisfaction</div><div class="stat-value" style="color:var(--success)">96%</div><div class="stat-delta" style="color:var(--success)">Évaluations clients</div></div>
+        <div class="stat-card blue"><div class="stat-label">Nouveaux clients</div><div class="stat-value" style="color:var(--info)">11</div><div class="stat-delta" style="color:var(--info)">Ce mois de mai</div></div>
+        <div class="stat-card"><div class="stat-label">Délai moyen</div><div class="stat-value">8j</div><div class="stat-delta">↓ Amélioré de 1j</div></div>
+      </div>
+      <div class="chart-row">
+        <div class="card"><div class="card-header"><div class="card-title">Commandes par catégorie</div></div><div style="padding:24px;" id="cat-bars"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">Revenus mensuels 2024</div></div><div style="padding:24px;"><div class="mini-chart" id="rev-chart" style="height:120px;"></div><div class="mini-labels" id="rev-labels"></div></div></div>
+      </div>
+      <div class="card"><div class="card-header"><div class="card-title">Top clients</div></div><table><thead><tr><th>Client</th><th>Commandes</th><th>Total dépensé</th><th>Dernière visite</th><th>Fidélité</th></tr></thead><tbody id="top-clients"></tbody></table></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ======= MODALS ======= -->
+<!-- Modal Client -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" onclick="closeModal('modal-client')">✕</button></div>
+    <!-- Photo client -->
+    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;">
+      <div>
+        <label class="form-label" style="display:block;margin-bottom:8px;">Photo du client</label>
+        <div id="client-photo-preview" style="width:90px;height:90px;border-radius:14px;background:var(--light);border:2px dashed rgba(120,76,244,0.3);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('c-photo-input').click()">👤</div>
+        <input type="file" id="c-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="previewClientPhoto(this)">
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('c-photo-input').click()" style="font-size:11px;">📁 Importer</button>
+          <button class="btn btn-outline btn-sm" onclick="captureClientCamera()" style="font-size:11px;">📷 Caméra</button>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div class="form-grid form-grid-2">
+          <div class="form-group"><label class="form-label">Nom</label><input class="form-control" id="c-nom" placeholder="Ex: Koné"/></div>
+          <div class="form-group"><label class="form-label">Prénom</label><input class="form-control" id="c-prenom" placeholder="Ex: Aminata"/></div>
+          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" id="c-tel" placeholder="+225 XX XX XX XX"/></div>
+          <div class="form-group"><label class="form-label">Ville</label><input class="form-control" id="c-ville" placeholder="Abidjan"/></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px"><label class="form-label">Adresse</label><input class="form-control" id="c-adresse" placeholder="Quartier, commune..."/></div>
+    <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-client')">Annuler</button>
+      <button class="btn btn-primary" onclick="addClient()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Commande -->
+<div class="modal-overlay" id="modal-commande">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" onclick="closeModal('modal-commande')">✕</button></div>
+    <div class="form-grid form-grid-2">
+      <div class="form-group"><label class="form-label">Client</label><select class="form-control" id="cmd-client"></select></div>
+      <div class="form-group"><label class="form-label">Type de vêtement</label><select class="form-control" id="cmd-type"><option>Robe de soirée</option><option>Costume homme</option><option>Boubou traditionnel</option><option>Robe de mariée</option><option>Ensemble pagne</option><option>Tenue enfant</option><option>Blazer sur mesure</option><option>Caftan</option></select></div>
+      <div class="form-group"><label class="form-label">Date de dépôt</label><input type="date" class="form-control" id="cmd-depot"/></div>
+      <div class="form-group"><label class="form-label">Date de livraison</label><input type="date" class="form-control" id="cmd-livraison"/></div>
+      <div class="form-group"><label class="form-label">Montant total (FCFA)</label><input type="number" class="form-control" id="cmd-montant" placeholder="Ex: 45000"/></div>
+      <div class="form-group"><label class="form-label">Avance reçue (FCFA)</label><input type="number" class="form-control" id="cmd-avance" placeholder="Ex: 20000"/></div>
+    </div>
+    <div class="form-group" style="margin-top:16px"><label class="form-label">Notes</label><textarea class="form-control" id="cmd-notes" rows="2" placeholder="Couleur, tissu, détails..."></textarea></div>
+    <!-- Photos de l'article -->
+    <div style="margin-top:18px;">
+      <label class="form-label" style="display:block;margin-bottom:10px;">📸 Photos de l'article (modèle, tissu, référence…)</label>
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;" id="cmd-photos-preview">
+        <div class="photo-upload-zone" style="width:90px;height:90px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;" onclick="document.getElementById('cmd-photo-input').click()">
+          <span style="font-size:24px;">📷</span>
+          <span style="font-size:10px;color:var(--mid);">Ajouter</span>
+        </div>
+      </div>
+      <input type="file" id="cmd-photo-input" accept="image/*" multiple style="display:none;" onchange="addCmdPhotos(this)">
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('cmd-photo-input').click()" style="font-size:11px;">📁 Importer depuis l'appareil</button>
+        <button class="btn btn-outline btn-sm" onclick="captureCmdCamera()" style="font-size:11px;">📷 Prendre une photo</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-commande')">Annuler</button>
+      <button class="btn btn-primary" onclick="addCommande()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Mensurations -->
+<div class="modal-overlay" id="modal-mesure">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header"><div class="modal-title">Enregistrer les mensurations</div><button class="modal-close" onclick="closeModal('modal-mesure')">✕</button></div>
+    <div class="form-group" style="margin-bottom:20px"><label class="form-label">Client</label><select class="form-control" id="m-client"></select></div>
+        <div class="form-group" style="margin-bottom:16px;">
+
+<label class="form-label">
+Type de personne
+</label>
+
+<select class="form-control" id="m-type">
+<option value="Enfant">Enfant</option>
+<option value="Homme">Adulte Homme</option>
+<option value="Femme">Adulte Femme</option>
+</select>
+</div>
+<div class="form-grid form-grid-3">
+
+<div class="form-group">
+<label class="form-label">👔 Épaule(cm)</label>
+<input type="number" class="form-control" id="m-epaules">
+</div>
+
+<div class="form-group">
+<label class="form-label">👕 Longueur haut(cm)</label>
+<input type="number" class="form-control" id="m-longueur-haut">
+</div>
+
+<div class="form-group">
+<label class="form-label">👗 Longueur robe (cm)</label>
+<input type="number" class="form-control" id="m-longueur-robe">
+</div>
+
+<div class="form-group">
+<label class="form-label">👖 Longueur pantalon (cm)</label>
+<input type="number" class="form-control" id="m-pantalon">
+</div>
+
+<div class="form-group">
+<label class="form-label">🧥 Poitrine (cm)</label>
+<input type="number" class="form-control" id="m-poitrine">
+</div>
+
+<div class="form-group">
+<label class="form-label">📏 Tour poitrine (cm)</label>
+<input type="number" class="form-control" id="m-tour-poitrine">
+</div>
+
+<div class="form-group">
+<label class="form-label">💪 Longueur manche (cm)</label>
+<input type="number" class="form-control" id="m-bras">
+</div>
+
+<div class="form-group">
+<label class="form-label">🪡 Tour manche (cm)</label>
+<input type="number" class="form-control" id="m-tour-manche">
+</div>
+
+<div class="form-group">
+<label class="form-label">📐 Tour hanche / Ceinture (cm)</label>
+<input type="number" class="form-control" id="m-hanches">
+</div>
+
+<div class="form-group">
+<label class="form-label">🦵 Tour cuisse (cm)</label>
+<input type="number" class="form-control" id="m-cuisse">
+</div>
+
+<div class="form-group">
+<label class="form-label">🩳 Longueur jupe (cm)</label>
+<input type="number" class="form-control" id="m-jupe">
+</div>
+
+</div>
+ </div>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-mesure')">Annuler</button>
+      <button class="btn btn-primary" onclick="addMesure()">Enregistrer</button>
+    </div>
+  </div>
+
+<!-- Modal Paiement -->
+<div class="modal-overlay" id="modal-paiement">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><div class="modal-title">Enregistrer un paiement</div><button class="modal-close" onclick="closeModal('modal-paiement')">✕</button></div>
+    <div class="form-grid form-grid-2">
+      <div class="form-group"><label class="form-label">Client</label><select class="form-control" id="p-client" onchange="updatePayCalc()"></select></div>
+      <div class="form-group"><label class="form-label">Commande</label><select class="form-control" id="p-cmd" onchange="updatePayCalc()"></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-control" id="p-type"><option value="avance">Avance</option><option value="solde">Solde final</option><option value="partiel">Paiement partiel</option></select></div>
+      <div class="form-group"><label class="form-label">Mode de paiement</label>
+        <select class="form-control" id="p-mode">
+          <option>Espèces</option><option>Wave</option><option>Orange Money</option>
+          <option>MTN Mobile Money</option><option>Moov Money</option><option>Virement bancaire</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:span 2">
+        <label class="form-label">Montant payé (FCFA)</label>
+        <input type="number" class="form-control" id="p-montant" placeholder="Ex: 25000" oninput="updatePayCalc()"/>
+      </div>
+    </div>
+    <div id="pay-calc-box" style="margin-top:14px;padding:14px;background:var(--light);border-radius:10px;border:1px solid rgba(120,76,244,0.15);font-size:13px;color:var(--mid);">Sélectionnez client et commande.</div>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-paiement')">Annuler</button>
+      <button class="btn btn-primary" onclick="addPaiement()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Dépense — amélioré avec liste matériaux -->
+<div class="modal-overlay" id="modal-depense">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title">Dépenses matériaux — Commande</div>
+      <button class="modal-close" onclick="closeModal('modal-depense')">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label class="form-label">Commande liée</label>
+      <select class="form-control" id="d-cmd" onchange="loadDepenseCmd()"></select>
+    </div>
+    <!-- Résumé commande sélectionnée -->
+    <div id="dep-cmd-info" style="display:none;padding:14px 16px;background:linear-gradient(135deg,rgba(120,76,244,0.07),rgba(255,60,172,0.04));border-radius:12px;margin-bottom:20px;border:1px solid rgba(120,76,244,0.15);">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="dep-cmd-info-content"></div>
+    </div>
+    <!-- Ajout d'un matériau -->
+    <div style="background:var(--cream);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid rgba(120,76,244,0.1);">
+      <div style="font-size:12px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">➕ Ajouter un matériau</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;">
+        <div class="form-group" style="gap:4px">
+          <label class="form-label" style="font-size:10px;">Matériau</label>
+          <select class="form-control" id="d-type" style="font-size:13px;">
+            <option>Tissu wax (mètre)</option><option>Tissu bazin (mètre)</option>
+            <option>Tissu dentelle (mètre)</option><option>Tissu coton (mètre)</option>
+            <option>Tissu satin (mètre)</option><option>Fil à coudre</option>
+            <option>Broderie / décoration</option><option>Boutons / fermetures</option>
+            <option>Doublure (mètre)</option><option>Élastique</option>
+            <option>Perles / ornements</option><option>Ruban / galon</option>
+            <option>Entoilage (mètre)</option><option>Autre matériau</option>
+          </select>
+        </div>
+        <div class="form-group" style="gap:4px">
+          <label class="form-label" style="font-size:10px;">Quantité</label>
+          <input type="number" class="form-control" id="d-qte" placeholder="Ex: 3" min="0.5" step="0.5" style="font-size:13px;" oninput="calcPrixUnitaire()"/>
+        </div>
+        <div class="form-group" style="gap:4px">
+          <label class="form-label" style="font-size:10px;">Coût total (FCFA)</label>
+          <input type="number" class="form-control" id="d-montant" placeholder="Ex: 8500" style="font-size:13px;" oninput="updateDepCalc();calcPrixUnitaire()"/>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="ajouterLigneMateriau()" style="height:40px;white-space:nowrap;">+ Ajouter</button>
+      </div>
+      <div style="font-size:12px;color:var(--mid);margin-top:6px;" id="prix-unitaire-info"></div>
+    </div>
+    <!-- Liste des matériaux ajoutés pour cette commande -->
+    <div id="mat-list-title" style="font-size:12px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:none;">Matériaux enregistrés pour cette commande</div>
+    <div id="mat-list-container"></div>
+    <!-- Aperçu bénéfice -->
+    <div style="margin-top:16px;padding:14px;background:var(--light);border-radius:10px;border:1px solid rgba(120,76,244,0.15);">
+      <div style="font-size:11px;color:var(--mid);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Aperçu bénéfice</div>
+      <div id="dep-calc-content" style="font-size:13px;color:var(--mid);">Sélectionnez une commande.</div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-depense')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reprogrammation retard -->
+<div class="modal-overlay" id="modal-reprog">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Reprogrammer la commande</div>
+      <button class="modal-close" onclick="closeModal('modal-reprog')">✕</button>
+    </div>
+
+    <!-- Fiche commande -->
+    <div id="reprog-fiche" style="background:linear-gradient(135deg,rgba(255,60,172,0.07),rgba(120,76,244,0.05));border-radius:12px;padding:14px 18px;margin-bottom:20px;border:1px solid rgba(120,76,244,0.15);"></div>
+
+    <div class="form-grid form-grid-2">
+      <div class="form-group" style="grid-column:span 2">
+        <label class="form-label">Nouvelle date de livraison</label>
+        <input type="date" class="form-control" id="reprog-date" style="font-size:15px;font-weight:600;" oninput="updateReprogPreview()"/>
+      </div>
+      <div class="form-group" style="grid-column:span 2">
+        <label class="form-label">Motif du report</label>
+        <select class="form-control" id="reprog-motif" onchange="toggleReprogAutre()">
+          <option value="">— Sélectionner un motif —</option>
+          <option value="Tissu non disponible">Tissu non disponible</option>
+          <option value="Client indisponible">Client indisponible</option>
+          <option value="Travail en cours plus long que prévu">Travail en cours plus long que prévu</option>
+          <option value="Retouche demandée par le client">Retouche demandée par le client</option>
+          <option value="Maladie du couturier">Maladie du couturier</option>
+          <option value="Manque de personnel">Manque de personnel</option>
+          <option value="Problème machine à coudre">Problème machine à coudre</option>
+          <option value="autre">Autre motif…</option>
+        </select>
+      </div>
+      <div class="form-group" id="reprog-autre-wrap" style="grid-column:span 2;display:none;">
+        <label class="form-label">Préciser le motif</label>
+        <input type="text" class="form-control" id="reprog-autre" placeholder="Décrivez le motif du report..."/>
+      </div>
+      <div class="form-group" style="grid-column:span 2">
+        <label class="form-label">Note interne (optionnel)</label>
+        <textarea class="form-control" id="reprog-note" rows="2" placeholder="Informations pour l'équipe..."></textarea>
+      </div>
+    </div>
+
+    <!-- Aperçu délai -->
+    <div id="reprog-preview" style="margin-top:14px;padding:12px 16px;background:var(--light);border-radius:10px;font-size:13px;color:var(--mid);">Sélectionnez une nouvelle date.</div>
+
+    <!-- Garder pour plus tard -->
+    <div style="margin-top:14px;padding:12px 16px;background:#FFFBF5;border-radius:10px;border:1px solid #FFD166;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--dark);">
+        <input type="checkbox" id="reprog-reporter" style="width:16px;height:16px;cursor:pointer;accent-color:#784CF4;">
+        <div>
+          <strong>Garder pour plus tard</strong>
+          <div style="font-size:12px;color:var(--mid);margin-top:2px;">La commande sera marquée <em>«Reportée»</em> et restéra dans la liste des retards avec la nouvelle date — visible à chaque ouverture.</div>
+        </div>
+      </label>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-reprog')">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmerReprog()">✅ Confirmer le report</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Édition Client -->
+<div class="modal-overlay" id="modal-edit-client">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Modifier le client</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-client')">✕</button>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;">
+      <div>
+        <label class="form-label" style="display:block;margin-bottom:8px;">Photo</label>
+        <div id="edit-client-photo-preview" style="width:90px;height:90px;border-radius:14px;background:var(--light);border:2px dashed rgba(120,76,244,0.3);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('ec-photo-input').click()">👤</div>
+        <input type="file" id="ec-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="previewEditClientPhoto(this)">
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('ec-photo-input').click()" style="font-size:11px;">📁</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('ec-photo-input').setAttribute('capture','environment');document.getElementById('ec-photo-input').click()" style="font-size:11px;">📷</button>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <input type="hidden" id="ec-id">
+        <div class="form-grid form-grid-2">
+          <div class="form-group"><label class="form-label">Nom</label><input class="form-control" id="ec-nom"/></div>
+          <div class="form-group"><label class="form-label">Prénom</label><input class="form-control" id="ec-prenom"/></div>
+          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" id="ec-tel"/></div>
+          <div class="form-group"><label class="form-label">Ville</label><input class="form-control" id="ec-ville"/></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px"><label class="form-label">Adresse</label><input class="form-control" id="ec-adresse"/></div>
+    <div style="display:flex;gap:12px;margin-top:20px;justify-content:space-between;">
+      <button class="btn btn-danger btn-sm" onclick="supprimerClient()">🗑 Supprimer</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" onclick="closeModal('modal-edit-client')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveEditClient()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Édition Commande -->
+<div class="modal-overlay" id="modal-edit-commande">
+  <div class="modal" style="max-width:660px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Modifier la commande <span id="edit-cmd-id-label" style="color:#784CF4;"></span></div>
+      <button class="modal-close" onclick="closeModal('modal-edit-commande')">✕</button>
+    </div>
+    <input type="hidden" id="ecmd-id">
+
+    <!-- Fiche client liée -->
+    <div id="ecmd-client-info" style="background:linear-gradient(135deg,rgba(120,76,244,0.07),rgba(255,60,172,0.04));border-radius:10px;padding:12px 16px;margin-bottom:18px;border:1px solid rgba(120,76,244,0.12);"></div>
+
+    <div class="form-grid form-grid-2">
+      <div class="form-group"><label class="form-label">Client</label><select class="form-control" id="ecmd-client" onchange="updateEditCmdClientInfo()"></select></div>
+      <div class="form-group"><label class="form-label">Type de vêtement</label>
+        <select class="form-control" id="ecmd-type">
+          <option>Robe de soirée</option><option>Costume homme</option><option>Boubou traditionnel</option>
+          <option>Robe de mariée</option><option>Ensemble pagne</option><option>Tenue enfant</option>
+          <option>Blazer sur mesure</option><option>Caftan</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Date de dépôt</label><input type="date" class="form-control" id="ecmd-depot"/></div>
+      <div class="form-group"><label class="form-label">Date de livraison</label><input type="date" class="form-control" id="ecmd-livraison"/></div>
+      <div class="form-group"><label class="form-label">Montant total (FCFA)</label><input type="number" class="form-control" id="ecmd-montant"/></div>
+      <div class="form-group"><label class="form-label">Avancement (%)</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="range" min="0" max="100" step="5" class="form-control" id="ecmd-avancement" style="flex:1;padding:6px 0;" oninput="document.getElementById('ecmd-avancement-val').textContent=this.value+'%'">
+          <span id="ecmd-avancement-val" style="font-size:14px;font-weight:600;color:#784CF4;min-width:36px;">0%</span>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Statut</label>
+        <select class="form-control" id="ecmd-statut">
+          <option value="en_cours">En cours</option>
+          <option value="livree">Livrée ✓</option>
+          <option value="retard">En retard ⚠</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Couturier assigné</label>
+        <select class="form-control" id="ecmd-couturier">
+          <option>Moussa K.</option><option>Awa S.</option><option>Kouadio J.</option><option>Fatou D.</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:14px"><label class="form-label">Notes / Description</label><textarea class="form-control" id="ecmd-notes" rows="2" placeholder="Couleur, tissu, détails..."></textarea></div>
+
+    <!-- Photos de l'article -->
+    <div style="margin-top:16px;">
+      <label class="form-label" style="display:block;margin-bottom:8px;">📸 Photos de l'article</label>
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;" id="ecmd-photos-preview"></div>
+      <input type="file" id="ecmd-photo-input" accept="image/*" multiple style="display:none;" onchange="addEditCmdPhotos(this)">
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('ecmd-photo-input').click()" style="font-size:11px;">📁 Ajouter photos</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('ecmd-photo-input').setAttribute('capture','environment');document.getElementById('ecmd-photo-input').click()" style="font-size:11px;">📷 Caméra</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:space-between;">
+      <button class="btn btn-danger btn-sm" onclick="supprimerCommande()">🗑 Supprimer</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" onclick="closeModal('modal-edit-commande')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveEditCommande()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Galerie -->
+<div class="modal-overlay" id="modal-galerie">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><div class="modal-title">Ajouter une création</div><button class="modal-close" onclick="closeModal('modal-galerie')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Nom de la création</label><input class="form-control" id="g-nom" placeholder="Ex: Robe Wax Flamboyante"/></div>
+      <div class="form-group"><label class="form-label">Catégorie</label><select class="form-control" id="g-cat"><option value="femme">Femme</option><option value="homme">Homme</option><option value="enfant">Enfant</option><option value="mariage">Mariage</option><option value="traditionnel">Traditionnel</option></select></div>
+      <div class="form-group"><label class="form-label">Emoji</label><input class="form-control" id="g-emoji" placeholder="Ex: 👗"/></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal('modal-galerie')">Annuler</button>
+      <button class="btn btn-primary" onclick="addGalerie()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========================
+// DATA
+// ========================
+const DB = {
+  clients:[
+    {id:1,nom:"Koné",prenom:"Aminata",tel:"+22507112233",ville:"Cocody",adresse:"Angré 7ème Tranche",commandes:3,total:125000},
+    {id:2,nom:"Diallo",prenom:"Marie",tel:"+22505445566",ville:"Yopougon",adresse:"Selmer",commandes:2,total:78000},
+    {id:3,nom:"Traoré",prenom:"Yves",tel:"+22501778899",ville:"Marcory",adresse:"Zone 4C",commandes:5,total:210000},
+    {id:4,nom:"Ouédraogo",prenom:"Fatou",tel:"+22507223344",ville:"Plateau",adresse:"Quartier Administratif",commandes:1,total:45000},
+    {id:5,nom:"Bamba",prenom:"Ibrahim",tel:"+22505556677",ville:"Abobo",adresse:"PK18",commandes:4,total:165000},
+  ],
+  commandes:[
+    {id:"CMD-001",clientId:1,vetement:"Robe de soirée",depot:"2024-05-01",livraison:"2024-05-15",montant:45000,avance:20000,statut:"livree",avancement:100},
+    {id:"CMD-002",clientId:2,vetement:"Costume homme",depot:"2024-05-05",livraison:"2024-05-20",montant:65000,avance:30000,statut:"en_cours",avancement:60},
+    {id:"CMD-003",clientId:3,vetement:"Boubou traditionnel",depot:"2024-04-28",livraison:"2024-05-10",montant:38000,avance:15000,statut:"retard",avancement:80},
+    {id:"CMD-004",clientId:5,vetement:"Robe de mariée",depot:"2024-05-08",livraison:"2024-05-25",montant:120000,avance:60000,statut:"en_cours",avancement:35},
+    {id:"CMD-005",clientId:4,vetement:"Ensemble pagne",depot:"2024-05-10",livraison:"2024-05-22",montant:28000,avance:10000,statut:"en_cours",avancement:50},
+    {id:"CMD-006",clientId:1,vetement:"Tenue enfant",depot:"2024-05-12",livraison:"2024-05-18",montant:15000,avance:8000,statut:"livree",avancement:100},
+    {id:"CMD-007",clientId:3,vetement:"Blazer sur mesure",depot:"2024-05-14",livraison:"2024-05-28",montant:55000,avance:25000,statut:"en_cours",avancement:20},
+  ],
+  mesures:[
+    {clientId:1,poitrine:88,taille:68,hanches:94,epaules:38,bras:58,pantalon:100},
+    {clientId:2,poitrine:92,taille:74,hanches:98,epaules:40,bras:60,pantalon:103},
+    {clientId:3,poitrine:96,taille:80,hanches:0,epaules:44,bras:62,pantalon:105},
+    {clientId:5,poitrine:90,taille:70,hanches:95,epaules:39,bras:59,pantalon:101},
+  ],
+   paiements:JSON.parse(localStorage.getItem('fc_paiements')||'[]'),
+     
+  depenses:[
+    {id:"DEP-001",date:"2024-05-02",cmdId:"CMD-001",type:"Tissu wax (mètre)",qte:4,montant:12000},
+    {id:"DEP-002",date:"2024-05-02",cmdId:"CMD-001",type:"Fil à coudre",qte:2,montant:1500},
+    {id:"DEP-003",date:"2024-05-02",cmdId:"CMD-001",type:"Broderie / décoration",qte:1,montant:3500},
+    {id:"DEP-004",date:"2024-05-06",cmdId:"CMD-002",type:"Tissu bazin (mètre)",qte:5,montant:22000},
+    {id:"DEP-005",date:"2024-05-06",cmdId:"CMD-002",type:"Boutons / fermetures",qte:10,montant:2500},
+    {id:"DEP-006",date:"2024-05-09",cmdId:"CMD-004",type:"Tissu dentelle (mètre)",qte:8,montant:48000},
+    {id:"DEP-007",date:"2024-05-09",cmdId:"CMD-004",type:"Doublure (mètre)",qte:4,montant:8000},
+    {id:"DEP-008",date:"2024-05-11",cmdId:"CMD-005",type:"Tissu wax (mètre)",qte:3,montant:9000},
+    {id:"DEP-009",date:"2024-05-13",cmdId:"CMD-006",type:"Tissu coton (mètre)",qte:2,montant:3000},
+    {id:"DEP-010",date:"2024-05-15",cmdId:"CMD-003",type:"Tissu bazin (mètre)",qte:6,montant:18000},
+  ],
+  galerie:[
+    {nom:"Robe Wax Élégante",cat:"femme",emoji:"👗"},
+    {nom:"Boubou Grand Boubou",cat:"traditionnel",emoji:"🧣"},
+    {nom:"Costume Cérémonie",cat:"homme",emoji:"🤵"},
+    {nom:"Robe de Mariée",cat:"mariage",emoji:"👰"},
+    {nom:"Tenue Enfant Fête",cat:"enfant",emoji:"🎀"},
+    {nom:"Caftan Luxe",cat:"femme",emoji:"✨"},
+    {nom:"Ensemble Pagne Homme",cat:"homme",emoji:"👔"},
+    {nom:"Robe Baptême",cat:"enfant",emoji:"🍼"},
+    {nom:"Voile de Mariée",cat:"mariage",emoji:"💍"},
+  ]
+};
+
+let clientFilter='', cmdFilter='all', galFilter='tous', selectedMesureClientId=null;
+let currentRecuClientId=null;
+
+// ========================
+// UTILS
+// ========================
+const getClient=id=>DB.clients.find(c=>c.id===id);
+const fmtDate=d=>{if(!d)return'—';const p=d.split('-');return`${p[2]}/${p[1]}/${p[0]}`;};
+const fmtMoney=n=>Number(n).toLocaleString('fr-FR')+' FCFA';
+
+function statusBadge(s){
+  const map={livree:['badge-success','Livrée'],en_cours:['badge-info','En cours'],retard:['badge-danger','En retard'],avance:['badge-warning','Avance'],solde:['badge-success','Solde'],partiel:['badge-gray','Partiel']};
+  const[cls,label]=map[s]||['badge-gray',s];
+  return`<span class="badge ${cls}">${label}</span>`;
+}
+
+const MOBILE_MONEY={
+  'Wave':{color:'#1EAAFC',bg:'#E6F6FF',emoji:'🌊',label:'Wave'},
+  'Orange Money':{color:'#FF6600',bg:'#FFF0E6',emoji:'🟠',label:'Orange Money'},
+  'MTN Mobile Money':{color:'#FFCC00',bg:'#FFFBE6',emoji:'🟡',label:'MTN Money'},
+  'Moov Money':{color:'#0055A5',bg:'#E6EEFF',emoji:'🔵',label:'Moov Money'},
+  'Espèces':{color:'#2D6A4F',bg:'#E6F6F0',emoji:'💵',label:'Espèces'},
+  'Virement bancaire':{color:'#5C6BFF',bg:'#EEEEFF',emoji:'🏦',label:'Virement'},
+};
+function modeBadge(mode){
+  const cfg=MOBILE_MONEY[mode]||{color:'#888',bg:'#f3f3f3',emoji:'💳',label:mode};
+  return`<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.color}30;">${cfg.emoji} ${cfg.label}</span>`;
+}
+
+// Calcul montant payé par commande depuis DB.paiements
+function getMontantPaye(cmdId){return DB.paiements.filter(p=>p.cmdId===cmdId).reduce((s,p)=>s+p.montant,0);}
+function getMontantDepenses(cmdId){return DB.depenses.filter(d=>d.cmdId===cmdId).reduce((s,d)=>s+d.montant,0);}
+
+// ========================
+// NAVIGATION
+// ========================
+const titles={dashboard:'Tableau de bord',clients:'Gestion des clients',commandes:'Commandes',mesures:'Mensurations',paiements:'Paiements',galerie:'Galerie',rapports:'Rapports',depenses:'Dépenses & Bénéfices',taches:'Tâches hebdomadaires',comptes:'🔐 Comptes clients'};
+const btnLabels={dashboard:'+ Nouvelle commande',clients:'+ Nouveau client',commandes:'+ Nouvelle commande',mesures:'+ Mesures',paiements:'+ Paiement',galerie:'+ Création',rapports:'',depenses:'+ Dépense',taches:'',comptes:''};
+const btnViews={dashboard:'modal-commande',clients:'modal-client',commandes:'modal-commande',mesures:'modal-mesure',paiements:'modal-paiement',galerie:'modal-galerie',rapports:'',depenses:'modal-depense',taches:'',comptes:''};
+
+function showView(name,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('page-title').textContent=titles[name];
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const btn=document.getElementById('btn-action');
+  if(btnLabels[name]){btn.style.display='';btn.textContent=btnLabels[name];btn.onclick=()=>openModal(btnViews[name]);}
+  else{btn.style.display='none';}
+  renderAll();
+}
+
+// ========================
+// MODALS
+// ========================
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  ['cmd-client','m-client'].forEach(sid=>{
+    const sel=document.getElementById(sid);
+    if(!sel)return;
+    sel.innerHTML=DB.clients.map(c=>`<option value="${c.id}">${c.nom} ${c.prenom}</option>`).join('');
+  });
+  const pClient=document.getElementById('p-client');
+  if(pClient){
+    pClient.innerHTML=DB.clients.map(c=>`<option value="${c.id}">${c.nom} ${c.prenom} — ${c.tel}</option>`).join('');
+    updatePayClientCmds();
+  }
+  const dCmd=document.getElementById('d-cmd');
+  if(dCmd){
+    dCmd.innerHTML=DB.commandes.map(c=>{const cl=getClient(c.clientId);return`<option value="${c.id}">${c.id} — ${c.vetement} (${cl?cl.nom+' '+cl.prenom:'?'})</option>`;}).join('');
+    loadDepenseCmd();
+  }
+  const today=new Date().toISOString().split('T')[0];
+  if(document.getElementById('cmd-depot'))document.getElementById('cmd-depot').value=today;
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// ========================
+// PAIEMENTS — calcul restant + WhatsApp
+// ========================
+function updatePayClientCmds(){
+  const clientId=parseInt(document.getElementById('p-client')?.value);
+  const sel=document.getElementById('p-cmd');
+  if(!sel)return;
+  const cmds=DB.commandes.filter(c=>c.clientId===clientId);
+  sel.innerHTML=cmds.map(c=>`<option value="${c.id}">${c.id} — ${c.vetement} (${fmtMoney(c.montant)})</option>`).join('');
+  updatePayCalc();
+}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='p-client')updatePayClientCmds();});
+
+function updatePayCalc(){
+  const cmdId=document.getElementById('p-cmd')?.value;
+  const montantSaisi=parseInt(document.getElementById('p-montant')?.value)||0;
+  const box=document.getElementById('pay-calc-box');
+  if(!box||!cmdId)return;
+  const cmd=DB.commandes.find(c=>c.id===cmdId);
+  if(!cmd){box.textContent='Commande introuvable.';return;}
+  const dejaPaye=getMontantPaye(cmdId);
+  const apres=dejaPaye+montantSaisi;
+  const restant=Math.max(0,cmd.montant-apres);
+  const col=restant===0?'var(--success)':'var(--warning)';
+  box.innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Prix total</div><div style="font-size:15px;font-weight:700;color:var(--info);">${fmtMoney(cmd.montant)}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Déjà payé</div><div style="font-size:15px;font-weight:700;color:var(--success);">${fmtMoney(dejaPaye)}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Ce paiement</div><div style="font-size:15px;font-weight:700;color:#784CF4;">${fmtMoney(montantSaisi)}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Restant dû</div><div style="font-size:15px;font-weight:700;color:${col};">${fmtMoney(restant)}</div></div>
+  </div>`;
+}
+
+function addPaiement(){
+  const clientId=parseInt(document.getElementById('p-client').value);
+  const cmdId=document.getElementById('p-cmd').value;
+  const type=document.getElementById('p-type').value;
+  const montant=parseInt(document.getElementById('p-montant').value)||0;
+  const mode=document.getElementById('p-mode').value;
+  if(!montant){alert('Veuillez saisir un montant');return;}
+  const p={id:`PAY-${String(DB.paiements.length+88).padStart(3,'0')}`,date:new Date().toISOString().split('T')[0],clientId,cmdId,type,montant,mode};
+  DB.paiements.unshift(p);
+  closeModal('modal-paiement');
+  renderPaiements();
+  // Mettre à jour avance de la commande
+  const cmd=DB.commandes.find(c=>c.id===cmdId);
+  if(cmd)cmd.avance=getMontantPaye(cmdId);
+}
+
+function sendWhatsAppCmd(cmdId){
+  const cmd=DB.commandes.find(c=>c.id===cmdId);
+  if(!cmd)return;
+  const cl=getClient(cmd.clientId);
+  if(!cl)return;
+  const paye=getMontantPaye(cmdId);
+  const restant=Math.max(0,cmd.montant-paye);
+  const tel=cl.tel.replace(/\s+/g,'').replace('+','');
+  const msg=`Bonjour ${cl.prenom} ${cl.nom} 👋\n\nConcernant votre commande *${cmdId}* — *${cmd.vetement}*\n\n✅ Montant total : ${fmtMoney(cmd.montant)}\n💰 Déjà payé : ${fmtMoney(paye)}\n${restant>0?`⚠️ Solde restant : *${fmtMoney(restant)}*`:'✅ Entièrement payé — Merci !'}\n📅 Livraison prévue : ${fmtDate(cmd.livraison)}\n\n_Atelier Fashion Couture — Abidjan_ 🧵`;
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function sendWhatsAppRecu(){
+  if(!currentRecuClientId)return;
+  const cl=getClient(currentRecuClientId);
+  if(!cl){alert('Sélectionnez un reçu d\'abord');return;}
+  const p=DB.paiements.find(x=>x.clientId===currentRecuClientId);
+  if(!p)return;
+  const cmd=DB.commandes.find(c=>c.id===p.cmdId);
+  const restant=cmd?Math.max(0,cmd.montant-getMontantPaye(p.cmdId)):0;
+  const tel=cl.tel.replace(/\s+/g,'').replace('+','');
+  const msg=`Bonjour ${cl.prenom} ${cl.nom} 👋\n\n🧾 *Reçu de paiement ${p.id}*\n\nArticle : ${cmd?cmd.vetement:'—'}\nMontant payé : *${fmtMoney(p.montant)}*\nMode : ${p.mode}\n${restant>0?`Solde restant : ${fmtMoney(restant)}`:'✅ Compte soldé — Merci !'}\n\n_Atelier Fashion Couture_ 🧵`;
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ========================
+// DÉPENSES — modal amélioré
+// ========================
+function loadDepenseCmd(){
+  const cmdId=document.getElementById('d-cmd')?.value;
+  if(!cmdId)return;
+  const cmd=DB.commandes.find(c=>c.id===cmdId);
+  if(!cmd)return;
+  const cl=getClient(cmd.clientId);
+  const paye=getMontantPaye(cmdId);
+  const deps=getMontantDepenses(cmdId);
+  const ben=cmd.montant-deps;
+  // Info box
+  document.getElementById('dep-cmd-info').style.display='block';
+  document.getElementById('dep-cmd-info-content').innerHTML=`
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Client</div><div style="font-size:14px;font-weight:600;color:var(--dark);">${cl?cl.nom+' '+cl.prenom:'?'}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Article</div><div style="font-size:14px;font-weight:600;color:#784CF4;">${cmd.vetement}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Prix fixé</div><div style="font-size:14px;font-weight:700;color:var(--info);">${fmtMoney(cmd.montant)}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;margin-bottom:4px;">Bénéfice actuel</div><div style="font-size:14px;font-weight:700;color:${ben>=0?'var(--success)':'var(--danger)'};">${ben>=0?'+':''}${fmtMoney(ben)}</div></div>`;
+  renderMatList(cmdId);
+  updateDepCalc();
+}
+
+function renderMatList(cmdId){
+  const list=DB.depenses.filter(d=>d.cmdId===cmdId);
+  const title=document.getElementById('mat-list-title');
+  const container=document.getElementById('mat-list-container');
+  if(!list.length){if(title)title.style.display='none';if(container)container.innerHTML='';return;}
+  if(title)title.style.display='block';
+  const total=list.reduce((s,d)=>s+d.montant,0);
+  container.innerHTML=`
+    <div style="border:1px solid rgba(120,76,244,0.15);border-radius:12px;overflow:hidden;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:2fr 60px 120px 36px;gap:0;background:linear-gradient(135deg,#F5F0FF,#FFF0F8);">
+        <div style="padding:8px 14px;font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;">Matériau</div>
+        <div style="padding:8px 8px;font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;">Qté</div>
+        <div style="padding:8px 14px;font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;">Montant</div>
+        <div></div>
+      </div>
+      ${list.map(d=>`
+        <div style="display:grid;grid-template-columns:2fr 60px 120px 36px;gap:0;border-top:1px solid rgba(120,76,244,0.07);">
+          <div style="padding:10px 14px;font-size:13px;color:var(--dark);">${d.type}</div>
+          <div style="padding:10px 8px;font-size:13px;color:var(--mid);">${d.qte}</div>
+          <div style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--danger);">− ${fmtMoney(d.montant)}</div>
+          <div style="padding:6px 4px;display:flex;align-items:center;justify-content:center;">
+            <button onclick="supprimerDepense('${d.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#FF3B5C;padding:4px;border-radius:6px;" title="Supprimer">🗑</button>
+          </div>
+        </div>`).join('')}
+      <div style="display:grid;grid-template-columns:2fr 60px 120px 36px;border-top:2px solid rgba(120,76,244,0.15);background:var(--light);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--mid);">TOTAL</div>
+        <div></div>
+        <div style="padding:10px 14px;font-size:14px;font-weight:700;color:var(--danger);">− ${fmtMoney(total)}</div>
+        <div></div>
+      </div>
+    </div>`;
+}
+
+function ajouterLigneMateriau(){
+  const cmdId=document.getElementById('d-cmd').value;
+  const type=document.getElementById('d-type').value;
+  const qte=parseFloat(document.getElementById('d-qte').value)||1;
+  const montant=parseInt(document.getElementById('d-montant').value)||0;
+  if(!cmdId||!montant){alert('Veuillez remplir quantité et coût');return;}
+  DB.depenses.push({id:`DEP-${String(DB.depenses.length+1).padStart(3,'0')}`,date:new Date().toISOString().split('T')[0],cmdId,type,qte,montant});
+  document.getElementById('d-qte').value='';
+  document.getElementById('d-montant').value='';
+  document.getElementById('prix-unitaire-info').textContent='';
+  loadDepenseCmd();
+  renderDepenses();
+}
+
+function supprimerDepense(id){
+  if(!confirm('Supprimer cette dépense ?'))return;
+  const idx=DB.depenses.findIndex(d=>d.id===id);
+  if(idx>=0)DB.depenses.splice(idx,1);
+  const cmdId=document.getElementById('d-cmd')?.value;
+  if(cmdId)loadDepenseCmd();
+  renderDepenses();
+}
+
+function calcPrixUnitaire(){
+  const qte=parseFloat(document.getElementById('d-qte')?.value)||0;
+  const montant=parseInt(document.getElementById('d-montant')?.value)||0;
+  const el=document.getElementById('prix-unitaire-info');
+  if(!el)return;
+  if(qte>0&&montant>0){const pu=Math.round(montant/qte);el.innerHTML=`Prix unitaire : <strong>${fmtMoney(pu)}</strong>`;}
+  else{el.textContent='';}
+}
+
+function updateDepCalc(){
+  const cmdId=document.getElementById('d-cmd')?.value;
+  const montantSaisi=parseInt(document.getElementById('d-montant')?.value)||0;
+  const calcEl=document.getElementById('dep-calc-content');
+  if(!cmdId||!calcEl)return;
+  const cmd=DB.commandes.find(c=>c.id===cmdId);
+  if(!cmd){calcEl.textContent='Commande introuvable.';return;}
+  const depExistantes=getMontantDepenses(cmdId);
+  const totalDep=depExistantes+montantSaisi;
+  const ben=cmd.montant-totalDep;
+  const marge=cmd.montant>0?Math.round((ben/cmd.montant)*100):0;
+  const col=ben>=0?'var(--success)':'var(--danger)';
+  calcEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px;">
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;">Prix fixé</div><div style="font-size:15px;font-weight:700;color:var(--info);">${fmtMoney(cmd.montant)}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;">Total dépenses</div><div style="font-size:15px;font-weight:700;color:var(--danger);">${fmtMoney(totalDep)}</div></div>
+    <div style="text-align:center;"><div style="font-size:10px;color:var(--mid);text-transform:uppercase;">Bénéfice</div><div style="font-size:15px;font-weight:700;color:${col};">${ben>=0?'+':''}${fmtMoney(ben)} (${marge}%)</div></div>
+  </div>`;
+}
+
+// ========================
+// BILAN PDF
+// ========================
+function toggleBilanDates(){
+  const p=document.getElementById('bilan-periode').value;
+  const libre=p==='libre';
+  ['bilan-date-debut-wrap','bilan-date-fin-wrap'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=libre?'':'none';
+  });
+}
+
+function getBilanCommandes(){
+  const periode=document.getElementById('bilan-periode').value;
+  const statut=document.getElementById('bilan-statut').value;
+  const clientQ=(document.getElementById('bilan-client')?.value||'').toLowerCase().trim();
+  const now=new Date();
+  let dateMin=null,dateMax=null;
+  if(periode==='hebdo'){dateMax=new Date(now);dateMin=new Date(now);dateMin.setDate(now.getDate()-7);}
+  else if(periode==='mensuel'){dateMin=new Date(now.getFullYear(),now.getMonth(),1);dateMax=new Date(now.getFullYear(),now.getMonth()+1,0);}
+  else if(periode==='annuel'){dateMin=new Date(now.getFullYear(),0,1);dateMax=new Date(now.getFullYear(),11,31);}
+  else if(periode==='libre'){
+    const d1=document.getElementById('bilan-date-debut').value;
+    const d2=document.getElementById('bilan-date-fin').value;
+    if(d1)dateMin=new Date(d1); if(d2)dateMax=new Date(d2);
+  }
+  let list=DB.commandes;
+  if(dateMin||dateMax){
+    list=list.filter(c=>{
+      const d=new Date(c.depot);
+      if(dateMin&&d<dateMin)return false;
+      if(dateMax&&d>dateMax)return false;
+      return true;
+    });
+  }
+  if(statut!=='tous')list=list.filter(c=>c.statut===statut);
+  if(clientQ){
+    list=list.filter(c=>{
+      const cl=getClient(c.clientId);
+      return cl&&(cl.nom+' '+cl.prenom+cl.tel).toLowerCase().includes(clientQ);
+    });
+  }
+  return list;
+}
+
+function previewBilan(){
+  const list=getBilanCommandes();
+  const box=document.getElementById('bilan-preview');
+  box.style.display='block';
+  if(!list.length){box.innerHTML='<div style="text-align:center;padding:20px;color:var(--mid);">Aucune commande trouvée pour ces critères.</div>';return;}
+  const totalRev=list.reduce((s,c)=>s+c.montant,0);
+  const totalPaye=list.reduce((s,c)=>s+getMontantPaye(c.id),0);
+  const totalDeps=list.reduce((s,c)=>s+getMontantDepenses(c.id),0);
+  const totalBen=totalRev-totalDeps;
+  box.innerHTML=`
+    <div style="border:1px solid rgba(120,76,244,0.2);border-radius:12px;overflow:hidden;">
+      <div style="padding:14px 18px;background:linear-gradient(135deg,#784CF4,#FF3CAC);color:white;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;">Aperçu Bilan — ${list.length} commande(s)</div>
+        <div style="font-size:12px;opacity:.85;">${new Date().toLocaleDateString('fr-FR')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(120,76,244,0.1);">
+        ${[['Revenus totaux',fmtMoney(totalRev),'#5C6BFF'],['Montant encaissé',fmtMoney(totalPaye),'#00C897'],['Total dépenses',fmtMoney(totalDeps),'#FF3B5C'],['Bénéfice net',fmtMoney(totalBen),totalBen>=0?'#00C897':'#FF3B5C']].map(([l,v,c])=>
+          `<div style="padding:14px;background:var(--white);text-align:center;"><div style="font-size:11px;color:var(--mid);text-transform:uppercase;margin-bottom:6px;">${l}</div><div style="font-size:16px;font-weight:700;color:${c};">${v}</div></div>`
+        ).join('')}
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="background:linear-gradient(135deg,#F5F0FF,#FFF0F8);">
+            <th style="padding:8px 12px;text-align:left;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Réf.</th>
+            <th style="padding:8px 12px;text-align:left;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Client</th>
+            <th style="padding:8px 12px;text-align:left;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Article</th>
+            <th style="padding:8px 12px;text-align:left;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Réception</th>
+            <th style="padding:8px 12px;text-align:left;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Livraison</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Montant</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Payé</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Dépenses</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Bénéfice</th>
+            <th style="padding:8px 12px;text-align:center;font-weight:600;color:var(--mid);text-transform:uppercase;font-size:10px;">Statut</th>
+          </tr></thead>
+          <tbody>
+            ${list.map(c=>{
+              const cl=getClient(c.clientId);
+              const paye=getMontantPaye(c.id);
+              const deps=getMontantDepenses(c.id);
+              const ben=c.montant-deps;
+              return`<tr style="border-top:1px solid rgba(120,76,244,0.07);">
+                <td style="padding:8px 12px;font-weight:600;">${c.id}</td>
+                <td style="padding:8px 12px;">${cl?cl.nom+' '+cl.prenom:'?'}<br><span style="font-size:10px;color:var(--mid);">${cl?cl.tel:''}</span></td>
+                <td style="padding:8px 12px;">${c.vetement}</td>
+                <td style="padding:8px 12px;color:var(--mid);">${fmtDate(c.depot)}</td>
+                <td style="padding:8px 12px;color:${c.statut==='retard'?'var(--danger)':'var(--mid)'};">${fmtDate(c.livraison)}</td>
+                <td style="padding:8px 12px;text-align:right;font-weight:600;">${fmtMoney(c.montant)}</td>
+                <td style="padding:8px 12px;text-align:right;color:var(--success);">${fmtMoney(paye)}</td>
+                <td style="padding:8px 12px;text-align:right;color:var(--danger);">${deps>0?'−'+fmtMoney(deps):'—'}</td>
+                <td style="padding:8px 12px;text-align:right;font-weight:700;color:${ben>=0?'var(--success)':'var(--danger)'};">${ben>=0?'+':''}${fmtMoney(ben)}</td>
+                <td style="padding:8px 12px;text-align:center;">${statusBadge(c.statut)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="background:var(--light);font-weight:700;border-top:2px solid rgba(120,76,244,0.2);">
+              <td colspan="5" style="padding:10px 12px;font-size:12px;">TOTAUX (${list.length} articles)</td>
+              <td style="padding:10px 12px;text-align:right;color:var(--info);">${fmtMoney(totalRev)}</td>
+              <td style="padding:10px 12px;text-align:right;color:var(--success);">${fmtMoney(totalPaye)}</td>
+              <td style="padding:10px 12px;text-align:right;color:var(--danger);">−${fmtMoney(totalDeps)}</td>
+              <td style="padding:10px 12px;text-align:right;color:${totalBen>=0?'var(--success)':'var(--danger)'};">${totalBen>=0?'+':''}${fmtMoney(totalBen)}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>`;
+}
+
+function genererBilan(){
+  const list=getBilanCommandes();
+  if(!list.length){alert('Aucune commande pour ces critères.');return;}
+  const periode=document.getElementById('bilan-periode').value;
+  const totalRev=list.reduce((s,c)=>s+c.montant,0);
+  const totalPaye=list.reduce((s,c)=>s+getMontantPaye(c.id),0);
+  const totalDeps=list.reduce((s,c)=>s+getMontantDepenses(c.id),0);
+  const totalBen=totalRev-totalDeps;
+  const periodeLabel={hebdo:'Hebdomadaire',mensuel:'Mensuel',annuel:'Annuel',libre:'Personnalisé'}[periode]||'';
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Bilan Fashion Couture</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+    body{font-family:'Segoe UI',sans-serif;color:#1A0533;padding:32px;background:#fff;}
+    h1{font-size:24px;color:#784CF4;margin-bottom:4px;}
+    .sub{font-size:12px;color:#7C4DA0;margin-bottom:24px;}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    .kpi{border-radius:10px;padding:14px;text-align:center;border:1px solid #EEE6FF;}
+    .kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#7C4DA0;margin-bottom:6px;}
+    .kpi-val{font-size:18px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:24px;}
+    th{padding:8px 10px;background:#F5F0FF;text-align:left;font-weight:600;color:#7C4DA0;text-transform:uppercase;font-size:10px;border-bottom:2px solid #EEE6FF;}
+    td{padding:8px 10px;border-bottom:1px solid #F3F0FF;}
+    tfoot td{background:#EEE6FF;font-weight:700;border-top:2px solid #784CF4;}
+    .sig{text-align:center;margin-top:32px;font-size:11px;color:#7C4DA0;border-top:1px dashed #EEE6FF;padding-top:16px;}
+    @media print{body{padding:16px;}}
+  </style></head><body>
+  <h1>Atelier Fashion Couture</h1>
+  <div class="sub">Bilan ${periodeLabel} — Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+  <div class="kpis">
+    <div class="kpi" style="background:#E8E6FF"><div class="kpi-label">Revenus</div><div class="kpi-val" style="color:#5C6BFF">${fmtMoney(totalRev)}</div></div>
+    <div class="kpi" style="background:#CCFFF0"><div class="kpi-label">Encaissé</div><div class="kpi-val" style="color:#007A5A">${fmtMoney(totalPaye)}</div></div>
+    <div class="kpi" style="background:#FFE0E8"><div class="kpi-label">Dépenses</div><div class="kpi-val" style="color:#CC0033">${fmtMoney(totalDeps)}</div></div>
+    <div class="kpi" style="background:${totalBen>=0?'#CCFFF0':'#FFE0E8'}"><div class="kpi-label">Bénéfice net</div><div class="kpi-val" style="color:${totalBen>=0?'#007A5A':'#CC0033'}">${totalBen>=0?'+':''}${fmtMoney(totalBen)}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Réf.</th><th>Client</th><th>Contact</th><th>Article</th><th>Réception</th><th>Livraison</th><th>Montant</th><th>Payé</th><th>Dépenses</th><th>Bénéfice</th><th>Statut</th></tr></thead>
+    <tbody>
+      ${list.map(c=>{const cl=getClient(c.clientId);const paye=getMontantPaye(c.id);const deps=getMontantDepenses(c.id);const ben=c.montant-deps;return`<tr><td><b>${c.id}</b></td><td>${cl?cl.nom+' '+cl.prenom:'?'}</td><td style="font-size:10px">${cl?cl.tel:''}</td><td>${c.vetement}</td><td>${fmtDate(c.depot)}</td><td>${fmtDate(c.livraison)}</td><td style="text-align:right">${fmtMoney(c.montant)}</td><td style="text-align:right;color:#007A5A">${fmtMoney(paye)}</td><td style="text-align:right;color:#CC0033">${deps>0?'−'+fmtMoney(deps):'—'}</td><td style="text-align:right;color:${ben>=0?'#007A5A':'#CC0033'};font-weight:700">${ben>=0?'+':''}${fmtMoney(ben)}</td><td>${{livree:'✅ Livrée',en_cours:'🔄 En cours',retard:'⚠️ Retard'}[c.statut]||c.statut}</td></tr>`;}).join('')}
+    </tbody>
+    <tfoot><tr><td colspan="6">TOTAUX — ${list.length} article(s)</td><td style="text-align:right">${fmtMoney(totalRev)}</td><td style="text-align:right;color:#007A5A">${fmtMoney(totalPaye)}</td><td style="text-align:right;color:#CC0033">−${fmtMoney(totalDeps)}</td><td style="text-align:right;color:${totalBen>=0?'#007A5A':'#CC0033'}">${totalBen>=0?'+':''}${fmtMoney(totalBen)}</td><td></td></tr></tfoot>
+  </table>
+  <div class="sig">Atelier Fashion Couture — Abidjan, Côte d'Ivoire 🧵 | Document confidentiel</div>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+}
+
+// ========================
+// RETARDS — gestion dynamique
+// ========================
+let currentReprogCmdId = null;
+
+function getRetardsActifs() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return DB.commandes.filter(c => {
+    if(c.statut === 'livree') return false;
+    const liv = new Date(c.livraison); liv.setHours(0,0,0,0);
+    // Retard réel : date dépassée OU statut = retard
+    return c.statut === 'retard' || liv < today;
+  }).sort((a,b) => new Date(a.livraison) - new Date(b.livraison));
+}
+
+function joursRetard(cmd) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const liv = new Date(cmd.livraison); liv.setHours(0,0,0,0);
+  return Math.ceil((today - liv) / (1000*60*60*24));
+}
+
+function renderRetardsPanel(panelId) {
+  const el = document.getElementById(panelId);
+  if(!el) return;
+  const retards = getRetardsActifs();
+  if(!retards.length) { el.innerHTML=''; return; }
+
+  const rows = retards.map(c => {
+    const cl = getClient(c.clientId);
+    const jr = joursRetard(c);
+    const isReporte = c.statut_detail === 'reporte';
+    const photo = cl && cl.photo
+      ? `<img src="${cl.photo}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,59,92,0.3);flex-shrink:0;">`
+      : `<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FF3B5C,#FF6B35);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;">${cl?cl.nom[0]+cl.prenom[0]:'?'}</div>`;
+    const delaiTxt = jr <= 0
+      ? `<span style="color:#FF8C00;font-size:12px;font-weight:600;">Livraison aujourd'hui !</span>`
+      : `<span style="color:#CC0033;font-size:12px;font-weight:600;">${jr}j de retard</span>`;
+    const reprogBadge = isReporte
+      ? `<span style="background:#FFF0CC;color:#B85C00;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:6px;">🔄 Reporté → ${fmtDate(c.nouvelle_date||c.livraison)}</span>`
+      : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${jr>3?'#FFF0F3':'#FFF8F9'};border-radius:10px;margin-bottom:8px;border-left:3px solid ${jr>3?'#CC0033':'#FF8C00'};">
+      ${photo}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <strong style="font-size:13px;">${cl?cl.nom+' '+cl.prenom:'?'}</strong>
+          <span style="font-size:12px;color:var(--mid);">— ${c.vetement}</span>
+          ${reprogBadge}
+        </div>
+        <div style="display:flex;gap:12px;margin-top:3px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:11px;color:var(--mid);">${c.id} | Prévu : ${fmtDate(c.livraison)}</span>
+          ${delaiTxt}
+          ${c.motif_retard?`<span style="font-size:11px;color:#784CF4;font-style:italic;">«${c.motif_retard}»</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" onclick="ouvrirReprog('${c.id}')" style="font-size:11px;white-space:nowrap;">🔄 Reprogrammer</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="sendWhatsAppCmd('${c.id}')" style="font-size:11px;padding:5px 8px;">📲</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div style="border-radius:14px;overflow:hidden;border:1px solid rgba(204,0,51,0.2);">
+    <div style="background:linear-gradient(90deg,#CC0033,#FF6B35);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;color:white;">
+        <span style="font-size:18px;">🚨</span>
+        <strong style="font-size:14px;">${retards.length} commande${retards.length>1?'s':''} en retard</strong>
+        <span style="font-size:12px;opacity:.85;">— Visible jusqu'à livraison</span>
+      </div>
+      <span style="background:rgba(255,255,255,0.25);color:white;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;">Action requise</span>
+    </div>
+    <div style="padding:10px 12px;background:white;">${rows}</div>
+  </div>`;
+}
+
+function ouvrirReprog(cmdId) {
+  currentReprogCmdId = cmdId;
+  const cmd = DB.commandes.find(c => c.id === cmdId);
+  const cl = getClient(cmd?.clientId);
+  if(!cmd || !cl) return;
+  const jr = joursRetard(cmd);
+  const photo = cl.photo
+    ? `<img src="${cl.photo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,59,92,0.3);">`
+    : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#FF3B5C,#FF6B35);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;">${cl.nom[0]}${cl.prenom[0]}</div>`;
+  const articlePhotos = cmd.photos && cmd.photos.length
+    ? cmd.photos.slice(0,3).map(p=>`<img src="${p}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;">`).join('')
+    : '';
+  document.getElementById('reprog-fiche').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;">
+      ${photo}
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:600;color:var(--dark);">${cl.nom} ${cl.prenom}</div>
+        <div style="font-size:13px;color:#784CF4;">${cmd.vetement} — ${cmd.id}</div>
+        <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--mid);">Date prévue : <strong>${fmtDate(cmd.livraison)}</strong></span>
+          <span style="font-size:12px;color:#CC0033;font-weight:600;">${jr>0?jr+'j de retard':'Livraison aujourd\'hui'}</span>
+          <span style="font-size:12px;color:var(--mid);">Avancement : ${cmd.avancement}%</span>
+        </div>
+        ${cmd.motif_retard?`<div style="margin-top:4px;font-size:12px;color:#784CF4;font-style:italic;">Motif précédent : «${cmd.motif_retard}»</div>`:''}
+      </div>
+      ${articlePhotos?`<div style="display:flex;gap:4px;">${articlePhotos}</div>`:''}
+    </div>`;
+  // Pré-remplir la date avec +3 jours
+  const newDate = new Date(); newDate.setDate(newDate.getDate()+3);
+  document.getElementById('reprog-date').value = newDate.toISOString().split('T')[0];
+  document.getElementById('reprog-motif').value = '';
+  document.getElementById('reprog-note').value = '';
+  document.getElementById('reprog-reporter').checked = false;
+  document.getElementById('reprog-autre-wrap').style.display = 'none';
+  updateReprogPreview();
+  openModal('modal-reprog');
+}
+
+function toggleReprogAutre() {
+  const v = document.getElementById('reprog-motif').value;
+  document.getElementById('reprog-autre-wrap').style.display = v === 'autre' ? 'block' : 'none';
+}
+
+function updateReprogPreview() {
+  const dateVal = document.getElementById('reprog-date')?.value;
+  const prev = document.getElementById('reprog-preview');
+  if(!prev) return;
+  if(!dateVal) { prev.textContent = 'Sélectionnez une nouvelle date.'; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const newD = new Date(dateVal); newD.setHours(0,0,0,0);
+  const diff = Math.ceil((newD - today) / (1000*60*60*24));
+  if(diff <= 0) {
+    prev.innerHTML = `<span style="color:#CC0033;">⚠️ La date choisie est déjà dépassée. Choisissez une date future.</span>`;
+  } else {
+    prev.innerHTML = `<span style="color:#00C897;">✅ Nouveau délai : <strong>${diff} jour${diff>1?'s':''}</strong> à partir d'aujourd'hui (${fmtDate(dateVal)})</span>`;
+  }
+}
+
+function confirmerReprog() {
+  const cmd = DB.commandes.find(c => c.id === currentReprogCmdId);
+  if(!cmd) return;
+  const newDate = document.getElementById('reprog-date').value;
+  const motifSel = document.getElementById('reprog-motif').value;
+  const motifAutre = document.getElementById('reprog-autre').value.trim();
+  const note = document.getElementById('reprog-note').value.trim();
+  const reporter = document.getElementById('reprog-reporter').checked;
+  if(!newDate) { alert('Veuillez choisir une nouvelle date de livraison.'); return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const newD = new Date(newDate); newD.setHours(0,0,0,0);
+  if(newD <= today) { alert('La nouvelle date doit être dans le futur.'); return; }
+  const motif = motifSel === 'autre' ? (motifAutre||'Autre') : motifSel;
+  if(!motif) { alert('Veuillez sélectionner un motif.'); return; }
+  // Sauvegarder historique
+  if(!cmd.historique_reprog) cmd.historique_reprog = [];
+  cmd.historique_reprog.push({
+    ancienne_date: cmd.livraison,
+    nouvelle_date: newDate,
+    motif,
+    note,
+    date_action: new Date().toISOString().split('T')[0]
+  });
+  // Mettre à jour la commande
+  const ancienne = cmd.livraison;
+  cmd.livraison = newDate;
+  cmd.nouvelle_date = newDate;
+  cmd.motif_retard = motif;
+  cmd.note_retard = note;
+  cmd.statut = reporter ? 'retard' : 'en_cours'; // garde retard si "pour plus tard"
+  cmd.statut_detail = reporter ? 'reporte' : '';
+  closeModal('modal-reprog');
+  currentReprogCmdId = null;
+  renderAll();
+  alert(`✅ Commande ${cmd.id} reprogrammée.\nAncienne date : ${fmtDate(ancienne)}\nNouvelle date : ${fmtDate(newDate)}\nMotif : ${motif}${reporter ? '\n\n📌 Commande gardée en liste retard jusqu\'à livraison.' : ''}`);
+}
+
+// ========================
+// RENDERS
+// ========================
+function updateSidebarRetardBadge(){
+  const retards = getRetardsActifs();
+  // Update "En retard" nav item to show count
+  document.querySelectorAll('.nav-item').forEach(ni=>{
+    if(ni.textContent.includes('Commandes')){
+      // inject badge
+      const existing = ni.querySelector('.retard-badge');
+      if(existing) existing.remove();
+      if(retards.length > 0){
+        const badge = document.createElement('span');
+        badge.className='retard-badge';
+        badge.style.cssText='margin-left:auto;background:#CC0033;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;line-height:1.4;';
+        badge.textContent = retards.length;
+        ni.appendChild(badge);
+      }
+    }
+  });
+}
+
+function renderAll(){
+  renderDashboard();
+  renderClients();
+  renderCommandes();
+  renderMesures();
+  renderPaiements();
+  renderPaiementsAdmin();
+  renderGalerie();
+  renderRapports();
+  renderDepenses();
+  renderTaches();
+  renderComptes();
+  renderRetardsPanel('retards-panel');
+  renderRetardsPanel('retards-panel-cmd');
+  updateSidebarRetardBadge();
+}
+// ========================
+// AFFICHER PAIEMENTS
+// ========================
+
+function renderPaiementsAdmin(){
+
+const table =
+document.getElementById(
+'paiements-table'
+);
+
+if(!table)return;
+
+table.innerHTML='';
+
+
+DB.paiements.forEach(p => {
+
+const client =
+DB.clients.find(
+c => c.id == p.clientId
+);
+
+table.innerHTML += `
+
+<tr>
+
+<td>
+
+${p.commandeId || p.cmdId || '--'}
+
+</td>
+
+<td>
+
+${client
+? client.nom+' '+client.prenom
+: '--'}
+
+</td>
+
+<td>
+
+${p.montant.toLocaleString()}
+FCFA
+
+</td>
+
+<td>
+
+${p.mode}
+
+</td>
+
+<td>
+
+${p.date}
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+// ========================
+// COMPTES CLIENTS (fc_users)
+// ========================
+function renderComptes(){
+  const USERS = JSON.parse(localStorage.getItem('fc_users')||'[]');
+  const q = (document.getElementById('comptes-search')?.value||'').toLowerCase();
+  const list = USERS.filter(u=>{
+    const name=(u.nom||'')+(u.prenom||'')+(u.tel_full||'')+(u.email||'');
+    return name.toLowerCase().includes(q);
+  });
+  const cnt = document.getElementById('comptes-count');
+  if(cnt) cnt.textContent = list.length+' compte(s)';
+
+  const tbody = document.getElementById('comptes-table');
+  if(!tbody) return;
+
+  if(list.length===0){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--mid);">Aucun compte client enregistré</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map((u,i)=>{
+    const avatar = `<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;">${(u.prenom||'?')[0]}${(u.nom||'?')[0]}</div>`;
+    const mode = u.contact_mode==='sms' ? '<span style="background:#E6F6FF;color:#1EAAFC;padding:2px 8px;border-radius:10px;font-size:11px;">💬 SMS</span>'
+               : u.contact_mode==='email' ? '<span style="background:#FFF3E0;color:#E65100;padding:2px 8px;border-radius:10px;font-size:11px;">✉️ Email</span>'
+               : '<span style="background:#E8F5E9;color:#2E7D32;padding:2px 8px;border-radius:10px;font-size:11px;">📱 WhatsApp</span>';
+    const contact = u.email || u.tel_full || u.sms_tel || '—';
+    const cmds = (u.commandes||[]).length;
+    const hasDefault = u.pass === btoa('0000') || u.pass === btoa('123456');
+    const passTag = hasDefault
+      ? '<span style="background:#FFF3E0;color:#E65100;padding:2px 8px;border-radius:10px;font-size:10px;">⚠️ Pass par défaut</span>'
+      : '<span style="background:#E8F5E9;color:#2E7D32;padding:2px 8px;border-radius:10px;font-size:10px;">✅ Personnalisé</span>';
+
+    return `<tr>
+      <td style="color:var(--mid);font-size:12px;">${i+1}</td>
+      <td><div style="display:flex;align-items:center;gap:10px;">${avatar}<div>
+        <strong>${u.prenom||''} ${u.nom||''}</strong><br>
+        <span style="font-size:11px;color:var(--mid);">ID: ${u.id||'—'}</span>
+      </div></div></td>
+      <td style="font-size:13px;">${contact}</td>
+      <td>${mode}</td>
+      <td><span class="badge badge-info">${cmds} cmd</span></td>
+      <td style="white-space:nowrap;">
+        ${passTag}
+        <button class="btn btn-outline btn-sm" style="margin-left:6px;font-size:11px;" onclick="resetUserPass(${u.id})" title="Réinitialiser le mot de passe">🔑 Réinit. pass</button>
+        <button class="btn btn-outline btn-sm" style="margin-left:4px;font-size:11px;color:#c00;" onclick="deleteUserCompte(${u.id})" title="Supprimer ce compte">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function resetUserPass(userId){
+  const USERS = JSON.parse(localStorage.getItem('fc_users')||'[]');
+  const idx = USERS.findIndex(u=>u.id===userId);
+  if(idx<0){showToast('Utilisateur introuvable','error');return;}
+  const u = USERS[idx];
+  const name = (u.prenom||'')+ ' '+(u.nom||'');
+  if(!confirm('Reinitialiser le mot de passe de '+name+' ? Nouveau pass: 0000. Lutilisateur devra le changer.')){return;}
+  USERS[idx].pass = btoa('0000');
+  USERS[idx].mustChangePass = true;
+  localStorage.setItem('fc_users', JSON.stringify(USERS));
+  showToast('✅ Mot de passe de '+name+' réinitialisé → 0000','success');
+  renderComptes();
+}
+
+function deleteUserCompte(userId){
+  const USERS = JSON.parse(localStorage.getItem('fc_users')||'[]');
+  const u = USERS.find(x=>x.id===userId);
+  if(!u) return;
+  const name = (u.prenom||'')+' '+(u.nom||'');
+  if(!confirm('Supprimer définitivement le compte de '+name+' ?')) return;
+  const newList = USERS.filter(x=>x.id!==userId);
+  localStorage.setItem('fc_users', JSON.stringify(newList));
+  showToast('Compte de '+name+' supprimé','success');
+  renderComptes();
+}
+
+function exportComptes(){
+  const USERS = JSON.parse(localStorage.getItem('fc_users')||'[]');
+  if(!USERS.length){showToast('Aucun compte à exporter','error');return;}
+  const rows = [['ID','Prénom','Nom','Contact','Mode','Commandes']];
+  USERS.forEach(u=>rows.push([u.id,u.prenom||'',u.nom||'',u.email||u.tel_full||'',u.contact_mode||'phone',(u.commandes||[]).length]));
+  const csv = rows.map(r=>r.join(';')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='comptes_clients.csv';
+  a.click();
+  showToast('Export CSV téléchargé','success');
+}
+
+function renderDashboard(){
+  // Stats dynamiques
+  const total = DB.commandes.length;
+  const livrees = DB.commandes.filter(c=>c.statut==='livree').length;
+  const retards = getRetardsActifs().length;
+  const ca = DB.commandes.reduce((s,c)=>s+c.montant,0);
+  const el = id=>document.getElementById(id);
+  if(el('stat-total')){el('stat-total').textContent=total;el('stat-total-delta').textContent=`${DB.clients.length} clients actifs`;}
+  if(el('stat-livrees')){el('stat-livrees').textContent=livrees;el('stat-livrees-delta').textContent=`✓ ${total?Math.round(livrees/total*100):0}% du total`;}
+  if(el('stat-retard')){el('stat-retard').textContent=retards;el('stat-retard-delta').textContent=retards>0?`⚠ Action requise`:'✓ Aucun retard';}
+  if(el('stat-ca')){el('stat-ca').textContent=ca.toLocaleString('fr-FR');}
+
+  // Panneau retards dynamique
+  renderRetardsPanel('retards-panel');
+  renderRetardsPanel('retards-panel-cmd');
+
+  // Update sidebar retard badge
+  updateSidebarRetardBadge();
+
+  const recent=DB.commandes.slice(-5).reverse();
+  document.getElementById('dash-commandes').innerHTML=recent.map(c=>{const cl=getClient(c.clientId);return`<tr><td><strong>${cl?cl.nom+' '+cl.prenom:'?'}</strong></td><td>${c.vetement}</td><td>${fmtDate(c.livraison)}</td><td>${statusBadge(c.statut)}</td></tr>`;}).join('');
+  const months=['Jan','Fév','Mar','Avr','Mai','Jun'],vals=[14,18,12,21,23,0],max=Math.max(...vals,1);
+  document.getElementById('mini-chart').innerHTML=months.map((m,i)=>`<div class="mini-bar" style="height:${(vals[i]/max)*100}%;background:${i===4?'linear-gradient(180deg,#FF3CAC,#784CF4)':'linear-gradient(180deg,#FF8FD8,#B89CFF)'};opacity:1"></div>`).join('');
+  document.getElementById('mini-labels').innerHTML=months.map(m=>`<div class="mini-label">${m}</div>`).join('');
+  const enCours=DB.commandes.filter(c=>c.statut==='en_cours'||c.statut==='retard');
+  const couturiers=['Moussa K.','Awa S.','Kouadio J.','Fatou D.'];
+  document.getElementById('avancement-table').innerHTML=enCours.map((c,i)=>{const cl=getClient(c.clientId);const jr=joursRetard(c);const isLate=jr>0&&c.statut!=='livree';return`<tr style="${isLate?'background:#FFF8F9;':''}">`+
+    `<td><strong>${c.id}</strong>${isLate?` <span style="font-size:10px;background:#FFE0E8;color:#CC0033;padding:2px 6px;border-radius:10px;">${jr}j</span>`:''}</td>`+
+    `<td>${cl?cl.nom+' '+cl.prenom:'?'}</td>`+
+    `<td>${c.vetement}</td>`+
+    `<td>${couturiers[i%couturiers.length]}</td>`+
+    `<td style="min-width:140px"><div style="display:flex;align-items:center;gap:8px;"><div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${c.avancement}%;background:${isLate?'linear-gradient(90deg,#FF3B5C,#FF6B35)':'linear-gradient(90deg,#784CF4,#FF3CAC)'}"></div></div><span style="font-size:12px;color:var(--mid);min-width:28px">${c.avancement}%</span></div></td>`+
+    `<td><span style="font-size:12px;color:${isLate?'#CC0033':'var(--mid)'};font-weight:${isLate?600:400};">${fmtDate(c.livraison)}</span></td>`+
+    `<td><button class="btn btn-outline btn-sm" onclick="ouvrirReprog('${c.id}')" style="font-size:11px;padding:4px 8px;">🔄</button></td>`+
+  `</tr>`;}).join('');
+  toggleBilanDates();
+}
+
+function renderClients(){
+  const q=(document.getElementById('client-search')?.value||'').toLowerCase();
+  const list=DB.clients.filter(c=>(c.nom+' '+c.prenom+c.tel).toLowerCase().includes(q));
+  document.getElementById('clients-table').innerHTML=list.map(c=>{
+    const photoHtml=c.photo
+      ?`<img src="${c.photo}" class="client-avatar-photo" title="Photo de ${c.nom}" onclick="viewPhoto('${c.photo}')" style="cursor:pointer;">`
+      :`<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;">${c.nom[0]}${c.prenom[0]}</div>`;
+    const cmdClient=DB.commandes.find(x=>x.clientId===c.id);
+    const nbRetards=DB.commandes.filter(x=>x.clientId===c.id&&x.statut==='retard').length;
+    return`<tr style="${nbRetards?'background:#FFF8F9;':''}">
+      <td style="color:var(--mid);font-size:12px">#${c.id}</td>
+      <td><div style="display:flex;align-items:center;gap:10px;">${photoHtml}<div>
+        <strong>${c.nom} ${c.prenom}</strong>
+        ${nbRetards?`<span style="font-size:10px;background:#FFE0E8;color:#CC0033;padding:1px 6px;border-radius:10px;margin-left:6px;">${nbRetards} retard</span>`:''}
+        <br><span style="font-size:12px;color:var(--mid)">${c.ville} — ${c.adresse||''}</span>
+      </div></div></td>
+      <td>${c.tel}</td>
+      <td><span class="badge badge-info">${c.commandes} cmd</span></td>
+      <td>${fmtMoney(c.total)}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-primary btn-sm" onclick="ouvrirEditClient(${c.id})" style="font-size:11px;" title="Modifier ce client">✏️ Modifier</button>
+        <button class="btn btn-outline btn-sm" onclick="voirMesures(${c.id})" style="margin-left:4px" title="Mensurations">📐</button>
+        <button class="btn btn-outline btn-sm" onclick="openModal('modal-commande')" style="margin-left:4px" title="Nouvelle commande">+ Cmd</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="sendWhatsAppCmd('${cmdClient?.id||''}')" style="margin-left:4px">📲</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterClients(){renderClients();}
+
+function renderCommandes(){
+  let list=DB.commandes;
+  if(cmdFilter!=='all')list=list.filter(c=>c.statut===cmdFilter);
+  document.getElementById('commandes-table').innerHTML=list.map(c=>{
+    const cl=getClient(c.clientId);
+    const paye=getMontantPaye(c.id);
+    // Client photo thumbnail
+    const clPhoto=cl&&cl.photo?`<img src="${cl.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid rgba(120,76,244,0.2);vertical-align:middle;margin-right:6px;">`:`<span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;margin-right:6px;vertical-align:middle;">${cl?cl.nom[0]+cl.prenom[0]:'?'}</span>`;
+    // Article photos
+    const articlePhotos=c.photos&&c.photos.length?c.photos.slice(0,3).map(p=>`<img src="${p}" class="photo-thumb" style="width:36px;height:36px;">`).join(''):`<span style="font-size:12px;color:var(--mid)">—</span>`;
+    return`<tr>
+      <td><strong>${c.id}</strong></td>
+      <td style="white-space:nowrap">${clPhoto}${cl?cl.nom+' '+cl.prenom:'?'}</td>
+      <td>${c.vetement}</td>
+      <td style="font-size:12px">${fmtDate(c.depot)}</td>
+      <td style="font-size:12px;color:${c.statut==='retard'?'var(--danger)':'inherit'}">${fmtDate(c.livraison)}</td>
+      <td>${fmtMoney(c.montant)}</td>
+      <td style="color:var(--success)">${fmtMoney(paye)}</td>
+      <td style="white-space:nowrap">${articlePhotos}</td>
+      <td>${statusBadge(c.statut)}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-primary btn-sm" onclick="ouvrirEditCommande('${c.id}')" style="font-size:11px;" title="Modifier">✏️</button>
+        <select class="form-control" style="padding:4px 8px;font-size:12px;width:auto;display:inline;margin-left:4px;" onchange="updateStatut('${c.id}',this.value)">
+          <option value="en_cours" ${c.statut==='en_cours'?'selected':''}>En cours</option>
+          <option value="livree" ${c.statut==='livree'?'selected':''}>Livrée ✓</option>
+          <option value="retard" ${c.statut==='retard'?'selected':''}>Retard ⚠</option>
+        </select>
+        <button class="btn btn-whatsapp btn-sm" onclick="sendWhatsAppCmd('${c.id}')" title="WhatsApp" style="padding:5px 8px;margin-left:4px;">📲</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterCommandes(val,el){cmdFilter=val;document.querySelectorAll('#view-commandes .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCommandes();}
+
+function renderMesures(){
+  const clientList=document.getElementById('mesure-client-list');
+  const countEl=document.getElementById('mesure-count');
+  if(!clientList)return;
+  countEl.textContent=DB.mesures.length+' fiche(s)';
+  clientList.innerHTML=DB.clients.map(cl=>{
+    const m=DB.mesures.find(x=>x.clientId===cl.id);
+    const isSelected=selectedMesureClientId===cl.id;
+    const hasMesure=!!m;
+    return`<div onclick="selectMesureClient(${cl.id})" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px;background:${isSelected?'linear-gradient(90deg,rgba(120,76,244,0.12),rgba(255,60,172,0.06))':'transparent'};border:1px solid ${isSelected?'rgba(120,76,244,0.3)':'transparent'};transition:all .15s;">
+      <div style="width:36px;height:36px;border-radius:50%;flex-shrink:0;background:${isSelected?'linear-gradient(135deg,#784CF4,#FF3CAC)':'linear-gradient(135deg,#EEE6FF,#FFE0F5)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:${isSelected?'white':'#784CF4'};">${cl.nom[0]}${cl.prenom[0]}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:${isSelected?600:500};color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cl.nom} ${cl.prenom}</div>
+        <div style="font-size:11px;color:var(--mid);margin-top:1px;">${hasMesure?'<span style="color:#00C897;">✓ Mesures enregistrées</span>':'<span style="color:#FF6B35;">Aucune mesure</span>'}</div>
+      </div>
+      <button onclick="event.stopPropagation();voirMesures(${cl.id})" title="Voir les mesures" style="width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;background:${isSelected?'rgba(120,76,244,0.15)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;${!hasMesure?'opacity:.3;pointer-events:none;':''}">👁</button>
+    </div>`;
+  }).join('');
+}
+function selectMesureClient(id){selectedMesureClientId=id;renderMesures();}
+function voirMesures(id){
+  selectedMesureClientId=id;
+  const m=DB.mesures.find(x=>x.clientId===id);
+  const cl=getClient(id);
+  const empty=document.getElementById('mesure-empty-state');
+  const detail=document.getElementById('mesure-detail-card');
+  if(!m||!cl){empty.style.display='flex';detail.style.display='none';renderMesures();return;}
+  empty.style.display='none';detail.style.display='block';
+  const labels=[
+
+{key:'type',label:'Type',icon:'👤',color:'#784CF4'},
+{key:'poitrine',label:'Poitrine',icon:'🫀',color:'#FF3CAC'},
+{key:'tour_poitrine',label:'Tour poitrine',icon:'📏',color:'#9C27B0'},
+{key:'epaules',label:'Épaules',icon:'↔',color:'#00C897'},
+{key:'longueur_haut',label:'Longueur haut',icon:'👕',color:'#3F51B5'},
+{key:'longueur_robe',label:'Longueur robe',icon:'👗',color:'#E91E63'},
+{key:'pantalon',label:'Longueur pantalon',icon:'👖',color:'#FF3B5C'},
+{key:'bras',label:'Longueur manche',icon:'💪',color:'#FF8C00'},
+{key:'tour_manche',label:'Tour manche',icon:'🪡',color:'#673AB7'},
+{key:'hanches',label:'Tour hanche / Ceinture',icon:'📐',color:'#5C6BFF'},
+{key:'cuisse',label:'Tour cuisse',icon:'🦵',color:'#009688'},
+{key:'jupe',label:'Longueur jupe',icon:'🩳',color:'#795548'}
+
+];
+
+  detail.innerHTML=`<div class="card"><div class="card-header"><div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;">${cl.nom[0]}${cl.prenom[0]}</div><div><div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--dark);">${cl.nom} ${cl.prenom}</div><div style="font-size:12px;color:var(--mid);">📍 ${cl.ville} — ${cl.tel}</div></div></div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="openModal('modal-mesure')" style="font-size:12px;">✏️ Modifier</button></div></div><div style="padding:20px 24px;"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">${labels.map(l=>`<div style="background:var(--cream);border-radius:12px;padding:16px 18px;border:1px solid rgba(120,76,244,0.1);text-align:center;position:relative;overflow:hidden;"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:${l.color};"></div><div style="font-size:22px;margin-bottom:8px;">${l.icon}</div><div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--dark);line-height:1;">${m[l.key]||'—'}</div><div style="font-size:11px;color:var(--mid);margin-top:2px;">${m[l.key]?'cm':''}</div><div style="font-size:12px;font-weight:500;color:${l.color};margin-top:6px;text-transform:uppercase;letter-spacing:.05em;">${l.label}</div></div>`).join('')}</div></div></div>`;
+  renderMesures();
+}
+function filterMesures(){renderMesures();}
+function addMesure(){
+  const clientId=parseInt(document.getElementById('m-client').value);
+  const idx=DB.mesures.findIndex(m=>m.clientId===clientId);
+  const mesure={
+  clientId:+document.getElementById('m-client').value,
+  type:document.getElementById('m-type').value,
+  epaules:+document.getElementById('m-epaules').value||0,
+  longueur_haut:+document.getElementById('m-longueur-haut').value||0,
+  longueur_robe:+document.getElementById('m-longueur-robe').value||0,
+  pantalon:+document.getElementById('m-pantalon').value||0,
+  poitrine:+document.getElementById('m-poitrine').value||0,
+  tour_poitrine:+document.getElementById('m-tour-poitrine').value||0,
+  bras:+document.getElementById('m-bras').value||0,
+  tour_manche:+document.getElementById('m-tour-manche').value||0,
+  hanches:+document.getElementById('m-hanches').value||0,
+  cuisse:+document.getElementById('m-cuisse').value||0,
+  jupe:+document.getElementById('m-jupe').value||0
+};
+  if(idx>=0)DB.mesures[idx]=mesure;else DB.mesures.push(mesure);
+  closeModal('modal-mesure');renderMesures();
+}
+
+function renderPaiements(){
+  // Stats
+  const total=DB.paiements.reduce((s,p)=>s+p.montant,0);
+  const avances=DB.paiements.filter(p=>p.type==='avance').reduce((s,p)=>s+p.montant,0);
+  const soldesRestants=DB.commandes.reduce((s,c)=>s+Math.max(0,c.montant-getMontantPaye(c.id)),0);
+  const el=id=>document.getElementById(id);
+  if(el('pay-total'))el('pay-total').textContent=total.toLocaleString('fr-FR');
+  if(el('pay-avances'))el('pay-avances').textContent=avances.toLocaleString('fr-FR');
+  if(el('pay-soldes'))el('pay-soldes').textContent=soldesRestants.toLocaleString('fr-FR');
+  if(el('pay-nb'))el('pay-nb').textContent=DB.paiements.length;
+  // Mobile money
+  const statsEl=document.getElementById('mobile-money-stats');
+  if(statsEl){
+    const modes=['Wave','Orange Money','MTN Mobile Money','Moov Money'];
+    statsEl.innerHTML=modes.map(mode=>{const cfg=MOBILE_MONEY[mode];const pays=DB.paiements.filter(p=>p.mode===mode);const tot=pays.reduce((s,p)=>s+p.montant,0);return`<div style="border-radius:14px;padding:18px;background:${cfg.bg};border:1px solid ${cfg.color}30;position:relative;overflow:hidden;"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:${cfg.color};"></div><div style="font-size:28px;margin-bottom:8px;">${cfg.emoji}</div><div style="font-size:13px;font-weight:600;color:${cfg.color};margin-bottom:6px;">${cfg.label}</div><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1A0533;">${tot.toLocaleString('fr-FR')}</div><div style="font-size:11px;color:${cfg.color};margin-top:2px;">FCFA — ${pays.length} transaction(s)</div></div>`;}).join('');
+  }
+  // Historique avec montant payé, restant, et bouton WhatsApp
+  document.getElementById('paiements-table').innerHTML=DB.paiements.map(p=>{
+    const cl=getClient(p.clientId);
+    const cmd=DB.commandes.find(c=>c.id===p.cmdId);
+    const totalPaye=getMontantPaye(p.cmdId);
+    const restant=cmd?Math.max(0,cmd.montant-totalPaye):0;
+    return`<tr>
+      <td style="font-size:12px;color:var(--mid)">${fmtDate(p.date)}</td>
+      <td><strong>${cl?cl.nom+' '+cl.prenom:'?'}</strong><br><span style="font-size:11px;color:var(--mid)">${cl?cl.tel:''}</span></td>
+      <td style="font-size:12px">${cmd?cmd.vetement:'?'}<br><span style="font-size:11px;color:var(--mid)">${p.cmdId}</span></td>
+      <td style="color:var(--success);font-weight:600">${fmtMoney(totalPaye)}</td>
+      <td><span style="font-weight:600;color:${restant===0?'var(--success)':'var(--danger)'};">${restant===0?'✅ Soldé':'− '+fmtMoney(restant)}</span></td>
+      <td>${modeBadge(p.mode)}</td>
+      <td style="display:flex;gap:4px;">
+        <button class="btn btn-outline btn-sm" onclick="previewRecu('${p.id}')">🧾</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="sendWaRappel(${p.clientId},'${p.cmdId}')" title="Rappel WhatsApp">📲</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function sendWaRappel(clientId,cmdId){currentRecuClientId=clientId;sendWhatsAppCmd(cmdId);}
+
+function previewRecu(payId){
+  const p=DB.paiements.find(x=>x.id===payId);
+  const cl=getClient(p?.clientId);
+  if(!p||!cl)return;
+  currentRecuClientId=cl.id;
+  const cmd=DB.commandes.find(c=>c.id===p.cmdId);
+  const totalPaye=getMontantPaye(p.cmdId);
+  const restant=cmd?Math.max(0,cmd.montant-totalPaye):0;
+  document.getElementById('recu-preview').innerHTML=`
+    <div class="recu-header"><h2>Fashion Couture</h2><p>Reçu de paiement</p></div>
+    <div class="recu-row"><span class="text-muted">N° Reçu</span><span><strong>${p.id}</strong></span></div>
+    <div class="recu-row"><span class="text-muted">Date</span><span>${fmtDate(p.date)}</span></div>
+    <div class="recu-row"><span class="text-muted">Client</span><span>${cl.nom} ${cl.prenom}</span></div>
+    <div class="recu-row"><span class="text-muted">Article</span><span>${cmd?cmd.vetement:'—'}</span></div>
+    <div class="recu-row"><span class="text-muted">Mode</span><span>${p.mode}</span></div>
+    <div class="recu-total"><span>Montant payé</span><span style="background:linear-gradient(135deg,#784CF4,#FF3CAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">${fmtMoney(p.montant)}</span></div>
+    ${restant>0?`<div style="margin-top:10px;padding:10px;background:#FFF0F3;border-radius:8px;text-align:center;font-size:13px;color:#CC0033;font-weight:600;">Solde restant : ${fmtMoney(restant)}</div>`:`<div style="margin-top:10px;padding:10px;background:#CCFFF0;border-radius:8px;text-align:center;font-size:13px;color:#007A5A;font-weight:600;">✅ Compte entièrement soldé</div>`}
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--mid);">Merci pour votre confiance 🙏<br>Atelier Fashion Couture — Abidjan</div>`;
+}
+function imprimerRecu(){const c=document.getElementById('recu-preview').innerHTML;const w=window.open('','_blank');w.document.write(`<html><head><title>Reçu</title><style>body{font-family:sans-serif;max-width:360px;margin:40px auto;padding:24px;border:2px dashed #784CF4;border-radius:12px;}.recu-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #eee;}.recu-total{display:flex;justify-content:space-between;font-weight:600;background:#EEE6FF;padding:12px;border-radius:8px;margin-top:12px;}</style></head><body>${c}</body></html>`);w.print();}
+
+function renderDepenses(){
+  const depEl=document.getElementById('depenses-table');
+  const matEl=document.getElementById('materiaux-table');
+  const repEl=document.getElementById('dep-repartition');
+  if(!depEl)return;
+  const cmdDepenses={};
+  DB.depenses.forEach(d=>{if(!cmdDepenses[d.cmdId])cmdDepenses[d.cmdId]=0;cmdDepenses[d.cmdId]+=d.montant;});
+  const totalRevenus=DB.commandes.reduce((s,c)=>s+c.montant,0);
+  const totalDepenses=DB.depenses.reduce((s,d)=>s+d.montant,0);
+  const benefice=totalRevenus-totalDepenses;
+  const marge=totalRevenus>0?Math.round((benefice/totalRevenus)*100):0;
+  const el=id=>document.getElementById(id);
+  if(el('dep-total-revenus'))el('dep-total-revenus').textContent=totalRevenus.toLocaleString('fr-FR');
+  if(el('dep-total-depenses'))el('dep-total-depenses').textContent=totalDepenses.toLocaleString('fr-FR');
+  if(el('dep-benefice'))el('dep-benefice').textContent=benefice.toLocaleString('fr-FR');
+  if(el('dep-marge'))el('dep-marge').textContent=`Marge : ${marge}%`;
+  if(el('dep-nb-articles'))el('dep-nb-articles').textContent=Object.keys(cmdDepenses).length;
+  depEl.innerHTML=DB.commandes.map(c=>{const dep=cmdDepenses[c.id]||0;const ben=c.montant-dep;const marg=c.montant>0?Math.round((ben/c.montant)*100):0;const cl=getClient(c.clientId);const isPositif=ben>=0;return`<tr><td><strong>${c.id}</strong></td><td>${c.vetement}</td><td style="font-size:12px">${cl?cl.nom+' '+cl.prenom:'?'}</td><td style="font-weight:600;color:var(--info)">${fmtMoney(c.montant)}</td><td style="color:var(--danger)">${dep>0?'− '+fmtMoney(dep):'<span style="color:var(--mid);font-size:12px">Non saisi</span>'}</td><td style="font-weight:700;color:${isPositif?'var(--success)':'var(--danger)'};font-size:15px;">${isPositif?'+':''}${fmtMoney(ben)}</td><td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;background:var(--light);border-radius:20px;height:8px;overflow:hidden;"><div style="width:${Math.max(0,Math.min(100,marg))}%;height:100%;border-radius:20px;background:${isPositif?'linear-gradient(90deg,#00C897,#5C6BFF)':'var(--danger)'};"></div></div><span style="font-size:12px;font-weight:600;color:${isPositif?'var(--success)':'var(--danger)'};min-width:36px;">${marg}%</span></div></td></tr>`;}).join('');
+  matEl.innerHTML=DB.depenses.map(d=>`<tr><td style="font-size:12px;color:var(--mid)">${fmtDate(d.date)}</td><td style="font-size:12px"><strong>${d.cmdId}</strong></td><td>${d.type}</td><td style="font-size:12px;color:var(--mid)">${d.qte}</td><td style="color:var(--danger);font-weight:600">− ${fmtMoney(d.montant)}</td></tr>`).join('');
+  const byType={};DB.depenses.forEach(d=>{byType[d.type]=(byType[d.type]||0)+d.montant;});
+  const sorted=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  const maxVal=sorted[0]?.[1]||1;
+  const colors=['#FF3CAC','#784CF4','#5C6BFF','#00C897','#FF8C00','#FF3B5C','#00D4FF'];
+  repEl.innerHTML=sorted.map(([type,val],i)=>`<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;color:var(--dark);font-weight:500;">${type}</span><span style="font-size:12px;font-weight:600;color:${colors[i%colors.length]};">${fmtMoney(val)}</span></div><div style="height:8px;background:var(--light);border-radius:20px;overflow:hidden;"><div style="width:${Math.round((val/maxVal)*100)}%;height:100%;border-radius:20px;background:${colors[i%colors.length]};"></div></div></div>`).join('');
+}
+
+// ========================
+// PHOTO HANDLING
+// ========================
+let pendingClientPhoto = null;
+let pendingCmdPhotos = [];
+
+function previewClientPhoto(input){
+  if(!input.files||!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    pendingClientPhoto=e.target.result;
+    const prev=document.getElementById('client-photo-preview');
+    if(prev)prev.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function captureClientCamera(){
+  const inp=document.getElementById('c-photo-input');
+  inp.setAttribute('capture','environment');
+  inp.click();
+}
+
+function addCmdPhotos(input){
+  if(!input.files)return;
+  Array.from(input.files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      pendingCmdPhotos.push(e.target.result);
+      renderCmdPhotosPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderCmdPhotosPreview(){
+  const container=document.getElementById('cmd-photos-preview');
+  if(!container)return;
+  container.innerHTML=pendingCmdPhotos.map((p,i)=>`
+    <div style="position:relative;display:inline-block;">
+      <img src="${p}" class="photo-thumb" style="width:90px;height:90px;cursor:pointer;" onclick="viewPhoto('${p}')">
+      <button onclick="removeCmdPhoto(${i})" style="position:absolute;top:-6px;right:-6px;background:#FF3B5C;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
+    </div>`).join('')+`
+    <div class="photo-upload-zone" style="width:90px;height:90px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;" onclick="document.getElementById('cmd-photo-input').click()">
+      <span style="font-size:24px;">📷</span><span style="font-size:10px;color:var(--mid);">Ajouter</span>
+    </div>`;
+}
+
+function removeCmdPhoto(i){pendingCmdPhotos.splice(i,1);renderCmdPhotosPreview();}
+
+function captureCmdCamera(){
+  const inp=document.getElementById('cmd-photo-input');
+  inp.setAttribute('capture','environment');
+  inp.removeAttribute('multiple');
+  inp.click();
+}
+
+function viewPhoto(src){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  overlay.innerHTML=`<img src="${src}" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">`;
+  overlay.onclick=()=>document.body.removeChild(overlay);
+  document.body.appendChild(overlay);
+}
+
+function addClient(){
+  const nom=document.getElementById('c-nom').value.trim();
+  const prenom=document.getElementById('c-prenom').value.trim();
+  if(!nom||!prenom){alert('Veuillez remplir le nom et prénom');return;}
+  DB.clients.push({
+    id:Date.now(),nom,prenom,
+    tel:document.getElementById('c-tel').value,
+    ville:document.getElementById('c-ville').value,
+    adresse:document.getElementById('c-adresse').value,
+    photo:pendingClientPhoto||null,
+    commandes:0,total:0
+  });
+  pendingClientPhoto=null;
+  const prev=document.getElementById('client-photo-preview');
+  if(prev)prev.innerHTML='👤';
+  closeModal('modal-client');
+  renderClients();
+}
+
+function addCommande(){
+  const clientId=parseInt(document.getElementById('cmd-client').value);
+  const vetement=document.getElementById('cmd-type').value;
+  const depot=document.getElementById('cmd-depot').value;
+  const livraison=document.getElementById('cmd-livraison').value;
+  const montant=parseInt(document.getElementById('cmd-montant').value)||0;
+  const avance=parseInt(document.getElementById('cmd-avance').value)||0;
+  const notes=document.getElementById('cmd-notes').value;
+  if(!depot||!livraison){alert('Veuillez renseigner les dates');return;}
+  const cmd={
+    id:`CMD-${String(DB.commandes.length+1).padStart(3,'0')}`,
+    clientId,vetement,depot,livraison,montant,avance,notes,
+    statut:'en_cours',avancement:0,
+    photos:[...pendingCmdPhotos]
+  };
+  DB.commandes.push(cmd);
+  localStorage.setItem(
+'fc_commandes',
+JSON.stringify(DB.commandes)
+);
+
+localStorage.setItem(
+'fc_paiements',
+JSON.stringify(DB.paiements)
+);
+
+localStorage.setItem(
+'fc_mesures',
+JSON.stringify(DB.mesures)
+);
+
+localStorage.setItem(
+'fc_notifications',
+JSON.stringify(DB.notifications)
+);
+
+  pendingCmdPhotos=[];
+  const prev=document.getElementById('cmd-photos-preview');
+  if(prev)prev.innerHTML=`<div class="photo-upload-zone" style="width:90px;height:90px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;" onclick="document.getElementById('cmd-photo-input').click()"><span style="font-size:24px;">📷</span><span style="font-size:10px;color:var(--mid);">Ajouter</span></div>`;
+  closeModal('modal-commande');
+  renderAll();
+  alert(`Commande ${cmd.id} enregistrée !`);
+}
+
+function updateStatut(cmdId,val){
+  const cmd=DB.commandes.find(c=>c.id===cmdId);
+  if(cmd){
+    cmd.statut=val;
+    if(val==='livree'){cmd.avancement=100;cmd.statut_detail='';}
+    if(val==='en_cours') cmd.statut_detail='';
+    renderDashboard();
+    renderCommandes();
+    updateSidebarRetardBadge();
+  }
+}
+
+// ========================
+// TÂCHES HEBDOMADAIRES
+// ========================
+function getWeekBounds(refDate){
+  const d=refDate?new Date(refDate):new Date();
+  const day=d.getDay(); // 0=dim
+  const diffToMon=day===0?-6:1-day;
+  const mon=new Date(d);mon.setDate(d.getDate()+diffToMon);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);
+  return{mon,sun};
+}
+
+function semaineSuivante(){
+  const fin=document.getElementById('tache-semaine-fin')?.value;
+  const base=fin?new Date(fin):new Date();
+  base.setDate(base.getDate()+1);
+  const{mon,sun}=getWeekBounds(base);
+  setWeekInputs(mon,sun);
+  renderTaches();
+}
+
+function setWeekInputs(mon,sun){
+  const toInput=d=>d.toISOString().split('T')[0];
+  const deb=document.getElementById('tache-semaine-debut');
+  const fin=document.getElementById('tache-semaine-fin');
+  if(deb)deb.value=toInput(mon);
+  if(fin)fin.value=toInput(sun);
+}
+
+function initWeekInputs(){
+  // Next week (for planning ahead — generate Sunday for next week)
+  const today=new Date();
+  const next=new Date(today);next.setDate(today.getDate()+7-today.getDay()+1); // Next Monday
+  const{mon,sun}=getWeekBounds(next);
+  setWeekInputs(mon,sun);
+}
+
+function getTachesData(){
+  const debut=document.getElementById('tache-semaine-debut')?.value;
+  const fin=document.getElementById('tache-semaine-fin')?.value;
+  const today=new Date();today.setHours(0,0,0,0);
+  const dMin=debut?new Date(debut):null;
+  const dMax=fin?new Date(fin):null;
+
+  return DB.commandes.filter(c=>c.statut!=='livree').map(c=>{
+    const cl=getClient(c.clientId);
+    const livDate=new Date(c.livraison);livDate.setHours(0,0,0,0);
+    const diffDays=Math.ceil((livDate-today)/(1000*60*60*24));
+    let priorite='ok';
+    if(c.statut==='retard'||livDate<today)priorite='retard';
+    else if(diffDays<=3)priorite='urgent';
+    // Check if delivery falls within selected week
+    const inWeek=(!dMin||livDate>=dMin)&&(!dMax||livDate<=dMax);
+    return{...c,cl,livDate,diffDays,priorite,inWeek};
+  }).sort((a,b)=>{
+    const order={retard:0,urgent:1,ok:2};
+    return(order[a.priorite]||2)-(order[b.priorite]||2)||a.livDate-b.livDate;
+  });
+}
+
+function renderTaches(){
+  const data=getTachesData();
+  const semDebut=document.getElementById('tache-semaine-debut')?.value;
+  const semFin=document.getElementById('tache-semaine-fin')?.value;
+
+  // Update semaine label
+  const lbl=document.getElementById('semaine-label');
+  if(lbl&&semDebut&&semFin)lbl.textContent=`Sem. du ${fmtDate(semDebut)} au ${fmtDate(semFin)}`;
+
+  const retards=data.filter(t=>t.priorite==='retard');
+  const urgents=data.filter(t=>t.priorite==='urgent'&&t.inWeek);
+  const normal=data.filter(t=>t.priorite==='ok'&&t.inWeek);
+  const inWeek=data.filter(t=>t.inWeek);
+  const livreesSem=DB.commandes.filter(c=>{
+    if(c.statut!=='livree')return false;
+    if(!semDebut||!semFin)return false;
+    const d=new Date(c.livraison);
+    return d>=new Date(semDebut)&&d<=new Date(semFin);
+  });
+
+  // Stats
+  const el=id=>document.getElementById(id);
+  if(el('t-nb-total'))el('t-nb-total').textContent=inWeek.length+retards.length;
+  if(el('t-nb-livrees'))el('t-nb-livrees').textContent=livreesSem.length;
+  if(el('t-nb-retard'))el('t-nb-retard').textContent=retards.length;
+  if(el('t-nb-prevues'))el('t-nb-prevues').textContent=inWeek.filter(t=>t.priorite!=='retard').length;
+
+  const tacheHtml=t=>{
+    const cl=t.cl;
+    const photo=cl&&cl.photo?`<img src="${cl.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(120,76,244,0.2);flex-shrink:0;">`:`<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;">${cl?cl.nom[0]+cl.prenom[0]:'?'}</div>`;
+    const articlePhotos=t.photos&&t.photos.length?`<div style="display:flex;gap:4px;">${t.photos.slice(0,2).map(p=>`<img src="${p}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;cursor:pointer;" onclick="viewPhoto('${p}')">`).join('')}</div>`:'';
+    const badge=t.priorite==='retard'?'<span style="background:#FFE0E8;color:#CC0033;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;">🔴 EN RETARD</span>':t.priorite==='urgent'?'<span style="background:#FFF0CC;color:#B85C00;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;">🟠 URGENT</span>':'<span style="background:#CCFFF0;color:#007A5A;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;">🟢 Normal</span>';
+    const delai=t.priorite==='retard'?`<span style="font-size:12px;color:#CC0033;">${Math.abs(t.diffDays)}j de retard</span>`:t.diffDays===0?'<span style="font-size:12px;color:#B85C00;">Livraison aujourd\'hui !</span>':`<span style="font-size:12px;color:var(--mid);">Dans ${t.diffDays}j</span>`;
+    return`<div class="tache-card ${t.priorite}" style="gap:12px;">
+      ${photo}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+          <strong style="font-size:14px;">${cl?cl.nom+' '+cl.prenom:'?'}</strong>
+          ${badge}
+        </div>
+        <div style="font-size:13px;color:var(--mid);">${t.vetement} — <strong style="color:var(--dark);">${t.id}</strong></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
+          <span style="font-size:12px;">📅 Livraison : <strong>${fmtDate(t.livraison)}</strong></span>
+          ${delai}
+          <span style="font-size:12px;color:var(--success);">Avancement : ${t.avancement}%</span>
+        </div>
+      </div>
+      ${articlePhotos}
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <button class="btn btn-whatsapp btn-sm" onclick="sendWhatsAppCmd('${t.id}')" style="white-space:nowrap;font-size:11px;">📲 Rappel</button>
+        <select style="font-size:11px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--white);color:var(--dark);cursor:pointer;" onchange="updateStatut('${t.id}',this.value)">
+          <option value="en_cours" ${t.statut==='en_cours'?'selected':''}>En cours</option>
+          <option value="livree" ${t.statut==='livree'?'selected':''}>Livrée ✓</option>
+          <option value="retard" ${t.statut==='retard'?'selected':''}>Retard</option>
+        </select>
+      </div>
+    </div>`;
+  };
+
+  const allDisplay=[...retards,...data.filter(t=>t.inWeek&&t.priorite!=='retard')];
+
+  // Dashboard mini-list
+  const dashEl=document.getElementById('dash-taches-list');
+  if(dashEl){
+    if(!allDisplay.length){dashEl.innerHTML='<div style="text-align:center;padding:20px;color:var(--mid);font-size:13px;">✅ Aucune tâche critique cette semaine</div>';}
+    else{dashEl.innerHTML=allDisplay.slice(0,4).map(tacheHtml).join('')+(allDisplay.length>4?`<div style="text-align:center;padding:8px;"><button class="btn btn-outline btn-sm" onclick="showView('taches',null)">Voir toutes les ${allDisplay.length} tâches →</button></div>`:'');}
+  }
+
+  // Full view
+  const listEl=document.getElementById('taches-list');
+  if(listEl){
+    if(!allDisplay.length){listEl.innerHTML='<div style="text-align:center;padding:40px;color:var(--mid);font-size:15px;">✅ Aucune tâche pour cette semaine.</div>';}
+    else{
+      let html='';
+      if(retards.length){html+=`<div style="font-size:12px;font-weight:600;color:#CC0033;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🔴 Retards (${retards.length})</div>`;html+=retards.map(tacheHtml).join('');}
+      if(urgents.length){html+=`<div style="font-size:12px;font-weight:600;color:#B85C00;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;">🟠 Urgents — livraison ≤3 jours (${urgents.length})</div>`;html+=urgents.map(tacheHtml).join('');}
+      if(normal.length){html+=`<div style="font-size:12px;font-weight:600;color:#007A5A;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;">🟢 Planifiés cette semaine (${normal.length})</div>`;html+=normal.map(tacheHtml).join('');}
+      listEl.innerHTML=html;
+    }
+  }
+}
+
+function genererTachesHebdo(){
+  const data=getTachesData();
+  const semDebut=document.getElementById('tache-semaine-debut')?.value||'';
+  const semFin=document.getElementById('tache-semaine-fin')?.value||'';
+  const retards=data.filter(t=>t.priorite==='retard');
+  const inWeek=data.filter(t=>t.inWeek);
+  const allList=[...retards,...inWeek.filter(t=>t.priorite!=='retard')];
+
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Tâches hebdomadaires</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+    body{font-family:'Segoe UI',sans-serif;color:#1A0533;padding:32px;}
+    h1{font-size:22px;color:#784CF4;margin-bottom:4px;}
+    .sub{font-size:12px;color:#7C4DA0;margin-bottom:20px;}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    .kpi{border-radius:10px;padding:14px;text-align:center;border:1px solid #EEE6FF;}
+    .kpi-label{font-size:10px;text-transform:uppercase;color:#7C4DA0;margin-bottom:6px;}
+    .kpi-val{font-size:20px;font-weight:700;}
+    .tache{padding:12px 16px;margin-bottom:10px;border-radius:10px;border-left:4px solid #ccc;background:#fafafa;page-break-inside:avoid;}
+    .tache.retard{border-left-color:#FF3B5C;background:#FFF8F9;}
+    .tache.urgent{border-left-color:#FF8C00;background:#FFFBF5;}
+    .tache.ok{border-left-color:#00C897;background:#F5FFFB;}
+    .tache-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+    .tache-sub{font-size:12px;color:#5a4080;}
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
+    .badge-r{background:#FFE0E8;color:#CC0033;}
+    .badge-u{background:#FFF0CC;color:#B85C00;}
+    .badge-o{background:#CCFFF0;color:#007A5A;}
+    .section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #EEE6FF;}
+    .sig{text-align:center;margin-top:32px;font-size:11px;color:#7C4DA0;border-top:1px dashed #EEE6FF;padding-top:16px;}
+    @media print{body{padding:16px;}}
+  </style></head><body>
+  <h1>🧵 Atelier Fashion Couture</h1>
+  <div class="sub">Planning tâches hebdomadaires — Semaine du ${fmtDate(semDebut)} au ${fmtDate(semFin)}<br>Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+  <div class="kpis">
+    <div class="kpi" style="background:#FFE0E8"><div class="kpi-label">Retards</div><div class="kpi-val" style="color:#CC0033">${retards.length}</div></div>
+    <div class="kpi" style="background:#EEE6FF"><div class="kpi-label">Total tâches</div><div class="kpi-val" style="color:#784CF4">${allList.length}</div></div>
+    <div class="kpi" style="background:#CCFFF0"><div class="kpi-label">Livraisons semaine</div><div class="kpi-val" style="color:#007A5A">${inWeek.length}</div></div>
+    <div class="kpi" style="background:#FFF0CC"><div class="kpi-label">Urgents (≤3j)</div><div class="kpi-val" style="color:#B85C00">${inWeek.filter(t=>t.priorite==='urgent').length}</div></div>
+  </div>
+  ${retards.length?`<div class="section-title">🔴 Commandes en retard (${retards.length})</div>`+retards.map(t=>`<div class="tache retard"><div class="tache-title">${t.id} — ${t.vetement} <span class="badge badge-r">🔴 RETARD ${Math.abs(t.diffDays)}j</span></div><div class="tache-sub">Client : ${t.cl?t.cl.nom+' '+t.cl.prenom:'?'} | Tél : ${t.cl?t.cl.tel:''} | Livraison prévue : ${fmtDate(t.livraison)} | Avancement : ${t.avancement}%</div></div>`).join(''):''}
+  ${inWeek.filter(t=>t.priorite==='urgent').length?`<div class="section-title">🟠 Urgents cette semaine</div>`+inWeek.filter(t=>t.priorite==='urgent').map(t=>`<div class="tache urgent"><div class="tache-title">${t.id} — ${t.vetement} <span class="badge badge-u">🟠 Dans ${t.diffDays}j</span></div><div class="tache-sub">Client : ${t.cl?t.cl.nom+' '+t.cl.prenom:'?'} | Tél : ${t.cl?t.cl.tel:''} | Livraison : ${fmtDate(t.livraison)} | Avancement : ${t.avancement}%</div></div>`).join(''):''}
+  ${inWeek.filter(t=>t.priorite==='ok').length?`<div class="section-title">🟢 Planifiés cette semaine</div>`+inWeek.filter(t=>t.priorite==='ok').map(t=>`<div class="tache ok"><div class="tache-title">${t.id} — ${t.vetement} <span class="badge badge-o">🟢 Dans ${t.diffDays}j</span></div><div class="tache-sub">Client : ${t.cl?t.cl.nom+' '+t.cl.prenom:'?'} | Tél : ${t.cl?t.cl.tel:''} | Livraison : ${fmtDate(t.livraison)} | Avancement : ${t.avancement}%</div></div>`).join(''):''}
+  <div class="sig">Atelier Fashion Couture — Abidjan, Côte d'Ivoire 🧵 | Planning confidentiel</div>
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`);
+}
+
+function sendTachesWhatsApp(){
+  const data=getTachesData();
+  const semDebut=document.getElementById('tache-semaine-debut')?.value||'';
+  const semFin=document.getElementById('tache-semaine-fin')?.value||'';
+  const retards=data.filter(t=>t.priorite==='retard');
+  const inWeek=data.filter(t=>t.inWeek);
+  const tel=prompt('Numéro WhatsApp du couturier/responsable (ex: 22507112233) :','');
+  if(!tel)return;
+  let msg=`🧵 *ATELIER FASHION COUTURE*\n📅 Planning semaine du ${fmtDate(semDebut)} au ${fmtDate(semFin)}\n\n`;
+  if(retards.length){msg+=`🔴 *RETARDS (${retards.length}) :*\n`;retards.forEach(t=>{msg+=`• ${t.id} — ${t.vetement}\n  👤 ${t.cl?t.cl.nom+' '+t.cl.prenom:'?'}\n  Retard: ${Math.abs(t.diffDays)}j | Avancement: ${t.avancement}%\n\n`;});}
+  if(inWeek.length){msg+=`📋 *TÂCHES SEMAINE (${inWeek.length}) :*\n`;inWeek.forEach(t=>{const icon=t.priorite==='urgent'?'🟠':'🟢';msg+=`${icon} ${t.id} — ${t.vetement}\n  👤 ${t.cl?t.cl.nom+' '+t.cl.prenom:'?'}\n  📅 Livraison : ${fmtDate(t.livraison)} | ${t.avancement}%\n\n`;});}
+  msg+=`_Envoyé automatiquement — Fashion Couture Manager_`;
+  window.open(`https://wa.me/${tel.replace(/\s+/g,'').replace('+','')}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function renderGalerie(){
+  const list=galFilter==='tous'?DB.galerie:DB.galerie.filter(g=>g.cat===galFilter);
+  const catColors={femme:'badge-info',homme:'badge-gray',enfant:'badge-success',mariage:'badge-warning',traditionnel:'badge-danger'};
+  document.getElementById('gallery-grid').innerHTML=list.map(g=>`<div class="gallery-item"><div class="gallery-img" style="font-size:56px">${g.emoji}</div><div class="gallery-info"><div class="name">${g.nom}</div><div class="cat"><span class="badge ${catColors[g.cat]||'badge-gray'}">${g.cat.charAt(0).toUpperCase()+g.cat.slice(1)}</span></div></div></div>`).join('');
+}
+function filterGalerie(val,el){galFilter=val;document.querySelectorAll('#view-galerie .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderGalerie();}
+function addGalerie(){const nom=document.getElementById('g-nom').value.trim();const cat=document.getElementById('g-cat').value;const emoji=document.getElementById('g-emoji').value||'👘';if(!nom){alert('Veuillez saisir un nom');return;}DB.galerie.push({nom,cat,emoji});closeModal('modal-galerie');renderGalerie();}
+
+function renderRapports(){
+  const cats=['Femme','Homme','Trad.','Mariage','Enfant'],cvals=[32,24,18,8,5],max=Math.max(...cvals);
+  document.getElementById('cat-bars').innerHTML=cats.map((c,i)=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><div style="font-size:13px;color:var(--dark);width:60px">${c}</div><div style="flex:1;background:var(--light);border-radius:4px;height:20px;overflow:hidden;"><div style="width:${(cvals[i]/max)*100}%;height:100%;background:linear-gradient(90deg,#784CF4,#FF3CAC);border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;"><span style="font-size:11px;font-weight:600;color:white">${cvals[i]}</span></div></div></div>`).join('');
+  const months=['Jan','Fév','Mar','Avr','Mai'],revs=[320000,485000,410000,550000,485000],rmax=Math.max(...revs);
+  document.getElementById('rev-chart').innerHTML=months.map((m,i)=>`<div class="mini-bar" style="height:${(revs[i]/rmax)*100}%;background:${i===4?'linear-gradient(180deg,#FF3CAC,#784CF4)':'linear-gradient(180deg,#FF8FD8,#B89CFF)'}"></div>`).join('');
+  document.getElementById('rev-labels').innerHTML=months.map(m=>`<div class="mini-label">${m}</div>`).join('');
+  const sorted=[...DB.clients].sort((a,b)=>b.total-a.total);
+  const stars=['⭐⭐⭐','⭐⭐⭐','⭐⭐','⭐⭐','⭐'];
+  document.getElementById('top-clients').innerHTML=sorted.map((c,i)=>`<tr><td><strong>${c.nom} ${c.prenom}</strong></td><td><span class="badge badge-info">${c.commandes}</span></td><td>${fmtMoney(c.total)}</td><td style="font-size:12px;color:var(--mid)">Mai 2024</td><td>${stars[i]||'⭐'}</td></tr>`).join('');
+}
+
+// ========================
+// EDIT CLIENT
+// ========================
+let editClientPhoto = null; // null = keep existing, string = new photo
+
+function ouvrirEditClient(id){
+  const c = DB.clients.find(x=>x.id===id);
+  if(!c) return;
+  editClientPhoto = undefined; // undefined = no change pending
+  document.getElementById('ec-id').value = c.id;
+  document.getElementById('ec-nom').value = c.nom;
+  document.getElementById('ec-prenom').value = c.prenom;
+  document.getElementById('ec-tel').value = c.tel;
+  document.getElementById('ec-ville').value = c.ville||'';
+  document.getElementById('ec-adresse').value = c.adresse||'';
+  const prev = document.getElementById('edit-client-photo-preview');
+  if(c.photo){
+    prev.innerHTML = `<img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
+  } else {
+    prev.innerHTML = `<div style="font-size:32px;">👤</div>`;
+  }
+  openModal('modal-edit-client');
+}
+
+function previewEditClientPhoto(input){
+  if(!input.files||!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    editClientPhoto = e.target.result;
+    const prev = document.getElementById('edit-client-photo-preview');
+    if(prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function saveEditClient(){
+  const id = parseInt(document.getElementById('ec-id').value);
+  const c = DB.clients.find(x=>x.id===id);
+  if(!c){ alert('Client introuvable'); return; }
+  const nom = document.getElementById('ec-nom').value.trim();
+  const prenom = document.getElementById('ec-prenom').value.trim();
+  if(!nom||!prenom){ alert('Nom et prénom requis'); return; }
+  c.nom = nom;
+  c.prenom = prenom;
+  c.tel = document.getElementById('ec-tel').value.trim();
+  c.ville = document.getElementById('ec-ville').value.trim();
+  c.adresse = document.getElementById('ec-adresse').value.trim();
+  if(editClientPhoto !== undefined) c.photo = editClientPhoto;
+  editClientPhoto = undefined;
+  closeModal('modal-edit-client');
+  renderAll();
+}
+
+function supprimerClient(){
+  const id = parseInt(document.getElementById('ec-id').value);
+  const c = DB.clients.find(x=>x.id===id);
+  if(!c) return;
+  const nbCmds = DB.commandes.filter(x=>x.clientId===id).length;
+  if(nbCmds > 0){
+    if(!confirm(`⚠️ Ce client a ${nbCmds} commande(s). Supprimer quand même ?`)) return;
+  } else {
+    if(!confirm(`Supprimer définitivement ${c.nom} ${c.prenom} ?`)) return;
+  }
+  const idx = DB.clients.findIndex(x=>x.id===id);
+  if(idx>=0) DB.clients.splice(idx,1);
+  closeModal('modal-edit-client');
+  renderAll();
+}
+
+// ========================
+// EDIT COMMANDE
+// ========================
+let editCmdPhotos = [];
+let editCmdId = null;
+
+function ouvrirEditCommande(cmdId){
+  const cmd = DB.commandes.find(c=>c.id===cmdId);
+  if(!cmd) return;
+  editCmdId = cmdId;
+  editCmdPhotos = [...(cmd.photos||[])];
+
+  document.getElementById('ecmd-id').value = cmdId;
+  document.getElementById('edit-cmd-id-label').textContent = cmdId;
+
+  // Populate client select
+  const sel = document.getElementById('ecmd-client');
+  sel.innerHTML = DB.clients.map(c=>`<option value="${c.id}" ${c.id===cmd.clientId?'selected':''}>${c.nom} ${c.prenom}</option>`).join('');
+
+  // Fill fields
+  document.getElementById('ecmd-type').value = cmd.vetement;
+  document.getElementById('ecmd-depot').value = cmd.depot||'';
+  document.getElementById('ecmd-livraison').value = cmd.livraison||'';
+  document.getElementById('ecmd-montant').value = cmd.montant||'';
+  document.getElementById('ecmd-avancement').value = cmd.avancement||0;
+  document.getElementById('ecmd-avancement-val').textContent = (cmd.avancement||0)+'%';
+  document.getElementById('ecmd-statut').value = cmd.statut||'en_cours';
+  document.getElementById('ecmd-couturier').value = cmd.couturier||'Moussa K.';
+  document.getElementById('ecmd-notes').value = cmd.notes||'';
+
+  // Photos
+  renderEditCmdPhotos();
+  updateEditCmdClientInfo();
+  openModal('modal-edit-commande');
+}
+
+function updateEditCmdClientInfo(){
+  const clientId = parseInt(document.getElementById('ecmd-client')?.value);
+  const cl = getClient(clientId);
+  const box = document.getElementById('ecmd-client-info');
+  if(!box||!cl) return;
+  const photo = cl.photo
+    ?`<img src="${cl.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(120,76,244,0.2);">`
+    :`<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#784CF4,#FF3CAC);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;">${cl.nom[0]}${cl.prenom[0]}</div>`;
+  const cmdsDuClient = DB.commandes.filter(c=>c.clientId===cl.id).length;
+  box.innerHTML = `<div style="display:flex;align-items:center;gap:12px;">
+    ${photo}
+    <div>
+      <div style="font-size:14px;font-weight:600;color:var(--dark);">${cl.nom} ${cl.prenom}</div>
+      <div style="font-size:12px;color:var(--mid);">${cl.tel} — ${cl.ville}</div>
+      <div style="font-size:11px;color:#784CF4;margin-top:2px;">${cmdsDuClient} commande(s) au total</div>
+    </div>
+  </div>`;
+}
+
+function renderEditCmdPhotos(){
+  const container = document.getElementById('ecmd-photos-preview');
+  if(!container) return;
+  container.innerHTML = editCmdPhotos.map((p,i)=>`
+    <div style="position:relative;display:inline-block;">
+      <img src="${p}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;cursor:pointer;border:2px solid rgba(120,76,244,0.15);" onclick="viewPhoto('${p}')">
+      <button onclick="removeEditCmdPhoto(${i})" style="position:absolute;top:-6px;right:-6px;background:#FF3B5C;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
+    </div>`).join('')
+    +`<div class="photo-upload-zone" style="width:80px;height:80px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border-radius:10px;" onclick="document.getElementById('ecmd-photo-input').click()">
+      <span style="font-size:20px;">📷</span><span style="font-size:10px;color:var(--mid);">Ajouter</span>
+    </div>`;
+}
+
+function addEditCmdPhotos(input){
+  if(!input.files) return;
+  Array.from(input.files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = e=>{ editCmdPhotos.push(e.target.result); renderEditCmdPhotos(); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeEditCmdPhoto(i){ editCmdPhotos.splice(i,1); renderEditCmdPhotos(); }
+
+function saveEditCommande(){
+  const cmd = DB.commandes.find(c=>c.id===editCmdId);
+  if(!cmd){ alert('Commande introuvable'); return; }
+  const livraison = document.getElementById('ecmd-livraison').value;
+  if(!livraison){ alert('Date de livraison requise'); return; }
+  cmd.clientId = parseInt(document.getElementById('ecmd-client').value);
+  cmd.vetement = document.getElementById('ecmd-type').value;
+  cmd.depot = document.getElementById('ecmd-depot').value;
+  cmd.livraison = livraison;
+  cmd.montant = parseInt(document.getElementById('ecmd-montant').value)||0;
+  cmd.avancement = parseInt(document.getElementById('ecmd-avancement').value)||0;
+  cmd.statut = document.getElementById('ecmd-statut').value;
+  cmd.couturier = document.getElementById('ecmd-couturier').value;
+  cmd.notes = document.getElementById('ecmd-notes').value;
+  cmd.photos = [...editCmdPhotos];
+  if(cmd.statut==='livree') cmd.avancement=100;
+  editCmdId = null;
+  editCmdPhotos = [];
+  closeModal('modal-edit-commande');
+  renderAll();
+}
+
+function supprimerCommande(){
+  const cmd = DB.commandes.find(c=>c.id===editCmdId);
+  if(!cmd) return;
+  const cl = getClient(cmd.clientId);
+  if(!confirm(`Supprimer définitivement la commande ${cmd.id} — ${cmd.vetement} (${cl?cl.nom+' '+cl.prenom:'?'}) ?`)) return;
+  const idx = DB.commandes.findIndex(c=>c.id===editCmdId);
+  if(idx>=0) DB.commandes.splice(idx,1);
+  closeModal('modal-edit-commande');
+  editCmdId = null;
+  renderAll();
+}
+
+function showAlerts(){alert('⚠️ Alertes actives :\n\n🔴 CMD-003 — Boubou Traoré Yves : EN RETARD\n🔴 CMD-007 — Wax faible avancement\n🟡 Stock tissu wax insuffisant\n🟡 3 soldes impayés > 14j');}
+function handleAction(){openModal('modal-commande');}
+
+function autoDetectRetards(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  DB.commandes.forEach(c => {
+    if(c.statut === 'livree') return;
+    const liv = new Date(c.livraison); liv.setHours(0,0,0,0);
+    if(liv < today && c.statut !== 'retard'){
+      c.statut = 'retard';
+    }
+  });
+}
+
+renderAll();
+autoDetectRetards();
+toggleBilanDates();
+initWeekInputs();
+renderAll(); // second pass après auto-detect
+</script>
+<script>
+// ===============================
+// VERIFICATION ADMIN
+// ===============================
+
+
+// logoutAdmin() définie dans le bloc login en haut du fichier
+// ===============================
+// AFFICHER MENSURATIONS CLIENT
+// ===============================
+
+function voirMesures(clientId){
+
+    // ouvrir page
+    showView('mesures', null);
+    // rechercher client
+    const client = DB.clients.find(c => c.id == clientId);
+
+    if(!client){alert('Client introuvable');return;}
+
+    // rechercher mesures
+    const mesure = DB.mesures.find(m => m.clientId == clientId);
+
+    // zones
+    const emptyState =
+    document.getElementById('mesure-empty-state');
+    const detailCard =
+    document.getElementById('mesure-detail-card');
+
+    // SI PAS DE MESURES
+    if(!mesure){emptyState.style.display='flex';detailCard.style.display='none';return;}
+    emptyState.style.display='none';detailCard.style.display='block';
+
+
+    // AFFICHAGE
+    detailCard.innerHTML = `
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div class="card-title">
+
+                📐 Mensurations de
+                ${client.nom}
+                ${client.prenom}
+
+            </div>
+
+        </div>
+
+        <div class="mesures-body">
+
+            ${createMesureItem('👤','Type',mesure.type || '--','#784CF4')}
+            ${createMesureItem('🫀','Poitrine',mesure.poitrine || '--','#FF3CAC')}
+            ${createMesureItem('📏','Tour poitrine',mesure.tour_poitrine || '--','#9C27B0')}
+            ${createMesureItem('↔','Épaules',mesure.epaules || '--','#00C897')}
+            ${createMesureItem('👕','Longueur haut',mesure.longueur_haut || '--','#3F51B5')}
+            ${createMesureItem('👗','Longueur robe',mesure.longueur_robe || '--','#E91E63')}
+            ${createMesureItem('👖','Longueur pantalon',mesure.pantalon || '--','#FF3B5C')}
+            ${createMesureItem('💪','Longueur manche',mesure.bras || '--','#FF8C00')}
+            ${createMesureItem('🪡','Tour manche',mesure.tour_manche || '--','#673AB7')}
+            ${createMesureItem('📐','Tour hanche',mesure.hanches || '--','#5C6BFF')}
+            ${createMesureItem('🦵','Tour cuisse',mesure.cuisse || '--','#009688')}
+            ${createMesureItem('🩳','Longueur jupe',mesure.jupe || '--','#795548'
+            )}
+
+        </div>
+
+    </div>
+    `;
+}
+
+// ===============================
+// CARTE MENSURATION
+// ===============================
+
+function createMesureItem(
+    icon,
+    label,
+    value,
+    color
+){
+    return `
+    <div class="mesure-item">
+        <div class="mesure-label">
+            ${icon} ${label}
+        </div>
+        <div
+class="mesure-value"
+style="background:linear-gradient(135deg,${color},#FF3CAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            ${value}
+
+            ${label !== 'Type'
+            ? '<span class="mesure-unit">cm</span>'
+            : ''}
+        </div>
+    </div>
+    `;
+}
+</script>
+
+<script>
+// ============================================
+// HAMBURGER MENU — Sidebar mobile
+// ============================================
+function toggleSidebar() {
+  const sidebar  = document.querySelector('aside.sidebar');
+  const overlay  = document.getElementById('sidebar-overlay');
+  const btn      = document.getElementById('hamburger-btn');
+  const isOpen   = sidebar.classList.contains('open');
+  if (isOpen) {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    btn.classList.remove('open');
+  } else {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function closeSidebar() {
+  document.querySelector('aside.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  const btn = document.getElementById('hamburger-btn');
+  if(btn) btn.classList.remove('open');
+}
+
+// Fermer la sidebar apres clic sur un item de nav (mobile)
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if(window.innerWidth <= 768) closeSidebar();
+    });
+  });
+});
+</script>
+</body>
+</html>
